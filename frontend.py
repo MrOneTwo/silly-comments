@@ -177,7 +177,10 @@ html_comments = '''
     <div class="comment">
         <div style="display: flex">
             <div class="comment_date">
-                <span>{{ c.created_on_dt.date() }}</span><span> {{ c.created_on_dt.time() }}</span>
+                <span>{{ c.created_on_dt.date() }}</span>
+                <span>{{ '%02d' % c.created_on_dt.hour }}</span>
+                <span>{{ '%02d' % c.created_on_dt.minute }}</span>
+                <span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
             </div>
             <div class="comment_author">
                 {{ c.created_by }}

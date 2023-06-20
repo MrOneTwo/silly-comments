@@ -4,6 +4,7 @@
 --text-color: #373e4a;
 --side-panes-color: #f1f1f1;
 --font-size: 22px;
+--font-size-half: 11px;
 --font-size-m1: 18px;
 --button-padding-vert: 12px;
 --button-padding-hori: 28px;
@@ -239,4 +240,12 @@ textarea {
   flex: 1;
   margin-top: 0px;
   text-align: left;
+}
+
+.comment-date-minutes {
+  font-size: var(--font-size);
+}
+
+.comment-date-seconds {
+  font-size: var(--font-size-half);
 }
