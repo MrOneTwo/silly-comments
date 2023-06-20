@@ -1,0 +1,242 @@
+@charset "UTF-8";
+
+:root {
+--text-color: #373e4a;
+--side-panes-color: #f1f1f1;
+--font-size: 22px;
+--font-size-m1: 18px;
+--button-padding-vert: 12px;
+--button-padding-hori: 28px;
+--col-main-1: #373e4a;
+}
+
+
+html {
+  height: 100%;
+}
+
+body {
+  min-height: 100vh;
+  padding: 0;
+  font-family: 'Source Serif Pro', serif;
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+  font-size: var(--font-size);
+  color: var(--text-color);
+  background: #f1f1f1;
+}
+
+* + * {
+  margin-top: 1em;
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: 'Inter', sans-serif;
+  margin-top: 0em;
+}
+
+h3 {
+  margin-bottom: 0.2em;
+}
+
+p {
+  font-size: var(--font-size);
+  margin-bottom: 0px;
+}
+
+li {
+  margin-top: 0.4em;
+}
+
+button {
+  border-radius: 8px;
+  background: var(--col-main-1);
+  color: #fafafa;
+  border: none;
+  padding: 12px 28px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: var(--font-size);
+  font-family: 'Source Serif Pro', serif;
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(120%);
+}
+
+label {
+  font-size: var(--font-size);
+  font-family: 'Source Serif Pro', serif;
+}
+
+.wrapper {
+  display: grid;
+  height: 100vh;
+  /* create 3 columns: flexible width, 80 chars or full width, flexible width */
+  grid-template-columns: 1fr min(70ch, calc(100% - 128px)) 1fr;
+  grid-template-rows: auto auto auto 1fr;
+  /*grid-column-gap: 32px;
+  grid-row-gap: 32px;
+  margin-left: 64px;
+  margin-right: 64px;
+  margin-top: 1em;
+  margin-bottom: 8em;
+  */
+  align-content: start;
+}
+
+/* place children in the second column */
+.wrapper > * {
+  grid-column: 2;
+  padding-left: 32px;
+  padding-right: 32px;
+  margin-top: 0px;
+  padding-top: 24px;
+  background: #fafafa;
+}
+
+.wrapper > .left {
+  grid-column: 1;
+  background: var(--side-panes-color);
+  padding-left: 64px;
+}
+
+.left > p {
+  width: 60%;
+}
+
+.wrapper > .right {
+  grid-column: 3;
+  background: var(--side-panes-color);
+}
+
+audio {
+  padding-left: 64px;
+  padding-right: 64px;
+  width: 100%;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+input[type="submit"] {
+  border-radius: 8px;
+  background: #373e4a;
+  color: #fafafa;
+  border: none;
+  padding: 12px 28px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: var(--font-size);
+  cursor: pointer;
+  font-family: 'Source Serif Pro', serif;
+}
+
+input[type="submit"]:hover {
+  filter: brightness(120%);
+}
+
+input[type="text"]
+{
+  font-size: var(--font-size-m1);
+  font-family: 'Source Serif Pro', serif;
+}
+
+.custom-file-browse {
+  border-radius: 8px;
+  background: #373e4a;
+  color: #fafafa;
+  border: none;
+  padding: 12px 28px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: var(--font-size);
+  cursor: pointer;
+}
+
+.custom-file-browse:hover {
+  filter: brightness(120%);
+}
+
+.custom-file-upload {
+  border: 1px solid #ccc;
+  display: inline-block;
+  padding: 6px 12px;
+  cursor: pointer;
+  background: #eee;
+  border-radius: 4px;
+  color: var(--text-color);
+  font-size: var(--font-size-m1);
+  font-family: 'Source Serif Pro', serif;
+}
+
+.deployment_in_progress {
+  padding: 8px;
+  border-radius: 4px;
+  animation-name: anim_deployment_in_progress;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes anim_deployment_in_progress {
+  0% {
+    background-color: #e8e8e8;
+  }
+  100 {
+    background-color: #c9c9c9;
+  }
+}
+
+
+.deployment_succeeded {
+  padding: 8px;
+  border-radius: 4px;
+  background-color: #99d46a;
+  animation-name: anim_deployment_succeeded;
+  animation-duration: 2s;
+  animation-iteration-count: 1;
+  animation-timing-function: cubic-bezier(.04,.68,.29,.98);
+}
+
+@keyframes anim_deployment_succeeded {
+  0% {
+    background-color: #d5f7ab;
+  }
+  100 {
+    background-color: #99d46a;
+  }
+}
+
+input[type="text"] {
+  font-family: 'Source Serif Pro', serif;
+  font-size: var(--font-size);
+}
+
+textarea {
+  font-family: 'Source Serif Pro', serif;
+  font-size: var(--font-size);
+}
+
+.comment {
+  border-style: solid;
+  padding: 1rem;
+}
+
+.comment_author {
+  flex: 1;
+  margin-top: 0px;
+  text-align: right;
+}
+
+.comment_date {
+  flex: 1;
+  margin-top: 0px;
+  text-align: left;
+}
