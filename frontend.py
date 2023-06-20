@@ -53,34 +53,12 @@ app_log = logging.getLogger('my_logger')
 app_log.info("------------------ Started the app ------------------")
 
 
-class Context():
-    def __init__(self):
-        self.uploaded_files = dict()
-        self.legible_to_bake = False
-        self.generated_sounds_file = ""
-        self.deploying = False
-        self.vehicles_to_deploy = {}
-        self.hash = 0
-
-    def valid_to_bake(self):
-        self.legible_to_bake = any([True for file_path in self.uploaded_files.values() if len(file_path) > 0])
-        return self.legible_to_bake
-
-    def rehash(self):
-        self.hash = hash(self)
-        return self.hash
-
-
 class Comment():
     def __init__(self):
         self.created_on_ts = 0
         self.created_on_dt = 0
         self.created_by = ""
         self.paragraphs = list()
-
-
-ctx = Context()
-ctx.uploaded_files = {i:"" for i in range(10)}
 
 
 # - HTML functions --------------------------------------------------------------------------------
@@ -93,8 +71,9 @@ html_index = '''
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@800&family=Source+Serif+Pro&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&family=Source+Serif+Pro&display=swap" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@900&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet">
         <script src="https://unpkg.com/htmx.org@1.8.0"></script>
         <script>
           // This is a very small function which is supposed to grab the changed
@@ -178,9 +157,7 @@ html_comments = '''
         <div style="display: flex">
             <div class="comment_date">
                 <span>{{ c.created_on_dt.date() }}</span>
-                <span>{{ '%02d' % c.created_on_dt.hour }}</span>
-                <span>{{ '%02d' % c.created_on_dt.minute }}</span>
-                <span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
+                <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
             </div>
             <div class="comment_author">
                 {{ c.created_by }}

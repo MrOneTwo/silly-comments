@@ -4,11 +4,12 @@
 --text-color: #373e4a;
 --side-panes-color: #f1f1f1;
 --font-size: 22px;
---font-size-half: 11px;
+--font-size-half: 16px;
 --font-size-m1: 18px;
 --button-padding-vert: 12px;
 --button-padding-hori: 28px;
 --col-main-1: #373e4a;
+--common-font: 'Inter', sans-serif;
 }
 
 
@@ -19,7 +20,7 @@ html {
 body {
   min-height: 100vh;
   padding: 0;
-  font-family: 'Source Serif Pro', serif;
+  font-family: var(--common-font);
   margin-left: 0px !important;
   margin-right: 0px !important;
   margin-top: 0px !important;
@@ -34,7 +35,6 @@ body {
 }
 
 h1, h2, h3, h4, h5 {
-  font-family: 'Inter', sans-serif;
   margin-top: 0em;
 }
 
@@ -61,7 +61,7 @@ button {
   text-decoration: none;
   display: inline-block;
   font-size: var(--font-size);
-  font-family: 'Source Serif Pro', serif;
+  font-family: var(--common-font);
   cursor: pointer;
 }
 
@@ -71,7 +71,7 @@ button:hover {
 
 label {
   font-size: var(--font-size);
-  font-family: 'Source Serif Pro', serif;
+  font-family: var(--common-font);
 }
 
 .wrapper {
@@ -136,7 +136,7 @@ input[type="submit"] {
   display: inline-block;
   font-size: var(--font-size);
   cursor: pointer;
-  font-family: 'Source Serif Pro', serif;
+  font-family: var(--common-font);
 }
 
 input[type="submit"]:hover {
@@ -146,7 +146,7 @@ input[type="submit"]:hover {
 input[type="text"]
 {
   font-size: var(--font-size-m1);
-  font-family: 'Source Serif Pro', serif;
+  font-family: var(--common-font);
 }
 
 .custom-file-browse {
@@ -175,7 +175,7 @@ input[type="text"]
   border-radius: 4px;
   color: var(--text-color);
   font-size: var(--font-size-m1);
-  font-family: 'Source Serif Pro', serif;
+  font-family: var(--common-font);
 }
 
 .deployment_in_progress {
@@ -216,12 +216,12 @@ input[type="text"]
 }
 
 input[type="text"] {
-  font-family: 'Source Serif Pro', serif;
+  font-family: var(--common-font);
   font-size: var(--font-size);
 }
 
 textarea {
-  font-family: 'Source Serif Pro', serif;
+  font-family: var(--common-font);
   font-size: var(--font-size);
 }
 
