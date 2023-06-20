@@ -64,92 +64,58 @@ class Comment():
 # - HTML functions --------------------------------------------------------------------------------
 
 html_index = '''
-    <!doctype html>
-    <head>
-        <meta charset="utf-8">
-        <link rel="stylesheet" href="static/main.css">
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&family=Source+Serif+Pro&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@900&display=swap" rel="stylesheet">
-        <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet">
-        <script src="https://unpkg.com/htmx.org@1.8.0"></script>
-        <script>
-          // This is a very small function which is supposed to grab the changed
-          // value from an input elements and copy it onto label element.
-          function update_name() {
-            var from = arguments[0];
-            var to = arguments[1];
-            to.innerHTML = from.files[0].name;
-          }
+<!doctype html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="static/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400&family=Source+Serif+Pro&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rubik&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@1.8.0"></script>
 
-          // Temporary stuff for the demo.
-          var clippy_visible = false;
+    <script>
+      // This is a very small function which is supposed to grab the changed
+      // value from an input elements and copy it onto label element.
+      function update_name() {
+        var from = arguments[0];
+        var to = arguments[1];
+        to.innerHTML = from.files[0].name;
+      }
+    </script>
 
-          function toggle(item) {
-            item === true ? item = false : item = true;
-            return item;
-          }
-          document.addEventListener('keydown',function(e) {
-            var key = e.keyCode || e.which;
-            if (key == 72) {
-                clippy_visible = toggle(clippy_visible);
+    <title>Silly comments demo...</title>
 
-                if (clippy_visible) {
-                    clippy.style.display = "block";
-                } else {
-                    clippy.style.display = "none";
-                }
-            }
-          }, false);
+</head>
+<body>
+    <div class="wrapper">
 
-          // Temporary stuff for the demo.
-          var voiboi_visible = false;
+        <div class="left" style="grid-row: 1; margin-top: 0em;">
+            <p style="margin-top: 0em;">
+            Just wanted to make a comment system...
+            </p>
 
-          document.addEventListener('keydown',function(e) {
-            var key = e.keyCode || e.which;
-            if (key == 66) {
-                voiboi_visible = toggle(voiboi_visible);
-
-                if (voiboi_visible) {
-                    voiboi.style.display = "block";
-                } else {
-                    voiboi.style.display = "none";
-                }
-            }
-          }, false);
-
-        </script>
-        <title>Mint your mixtape!</title>
-    </head>
-    <body>
-        <div class="wrapper">
-
-            <div class="left" style="grid-row: 1; margin-top: 0em;">
-                <p style="margin-top: 0em;">
-                Just wanted to make a comment system...
-                </p>
-
-                </ul>
-            </div>
-
-            <!-- swap self for comments, for this article -->
-            <div style="grid-row: 1" id="comments" hx-get="/article_slug" hx-swap="innerHTML" hx-trigger="load">
-            </div>
-
-            <div style="grid-row: 2; padding-bottom: 100px;">
-                <form hx-post="/article_slug" hx-target="#comments" fenctype=multipart/form-data>
-                    <input type="text" id="comment_contact" name="comment_contact" placeholder="Name, e-mail" required></input><br>
-                    <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
-                    <input id="submit" class="custom-file-upload" type=submit value=Submit>
-                </form>
-            </div>
-
+            </ul>
         </div>
-    </body>
-    </html>
-    '''
+
+        <!-- swap self for comments, for this article -->
+        <div style="grid-row: 1" id="comments" hx-get="/article_slug" hx-swap="innerHTML" hx-trigger="load">
+        </div>
+
+        <div style="grid-row: 2; padding-bottom: 100px;">
+            <form hx-post="/article_slug" hx-target="#comments" fenctype=multipart/form-data>
+                <input type="text" id="comment_contact" name="comment_contact" placeholder="Name, e-mail" required></input><br>
+                <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
+                <input id="submit" class="custom-file-upload" type=submit value=Submit>
+            </form>
+        </div>
+
+    </div>
+</body>
+</html>
+'''
 
 html_comments = '''
     {%- for c in comments %}

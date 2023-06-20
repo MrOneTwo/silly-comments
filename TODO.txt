@@ -1,0 +1,3 @@
+- break down into demo index.html webpage and the app that only serves comments
+- filter the request URL that can create and view comments
+- create directory for slug if missing
