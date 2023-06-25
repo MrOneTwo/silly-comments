@@ -192,6 +192,9 @@ def get_comments_for_slug(slug: str):
 def create_new_comment(author: str, comment: str, comment_fname: str, slug: str):
     app_log.info(f"Creating new comment from {author}")
 
+    if not Path(COMMENTS_DIR, slug).exists():
+        Path(COMMENTS_DIR, slug).mkdir(parents=True)
+
     p = Path(COMMENTS_DIR, slug, comment_fname).with_suffix('.txt')
 
     try:
