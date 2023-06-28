@@ -16,8 +16,10 @@ from enum import IntEnum, unique
 
 
 COMMENTS_DIR = "comments"
+PREFIX = ""
 
-app = Flask(__name__)
+app = Flask(__name__,
+            static_url_path='/static')
 
 logging.config.dictConfig({
     'version': 1,
@@ -208,13 +210,13 @@ def create_new_comment(author: str, comment: str, comment_fname: str, slug: str)
         app_log.error(f"File {p} already exists, skipping comment!")
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route(PREFIX + '/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
         return html_index
 
 
-@app.route('/article_slug', methods=['GET', 'POST'])
+@app.route(PREFIX + '/article_slug', methods=['GET', 'POST'])
 def comments_for_article():
     if request.method == 'GET':
         comments = get_comments_for_slug('article_slug')
