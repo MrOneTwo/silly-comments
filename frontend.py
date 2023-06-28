@@ -16,7 +16,10 @@ from enum import IntEnum, unique
 
 
 COMMENTS_DIR = "comments"
-PREFIX = ""
+# I currently assume that NGINX will proxy to /. The HTMX
+# requests have to send requests to correct URL though.
+# That's what URL_PREFIX is for.
+URL_PREFIX = "/silly"
 
 app = Flask(__name__,
             static_url_path='/static')
@@ -65,7 +68,8 @@ class Comment():
 
 # - HTML functions --------------------------------------------------------------------------------
 
-html_index = '''
+# The \ avoids the empty line.
+html_index = '''\
 <!doctype html>
 <head>
     <meta charset="utf-8">
@@ -103,11 +107,11 @@ html_index = '''
         </div>
 
         <!-- swap self for comments, for this article -->
-        <div style="grid-row: 1" id="comments" hx-get="/article_slug" hx-swap="innerHTML" hx-trigger="load">
+        <div style="grid-row: 1" id="comments" hx-get="{{ prefix }}/article_slug" hx-swap="innerHTML" hx-trigger="load">
         </div>
 
         <div style="grid-row: 2; padding-bottom: 100px;">
-            <form hx-post="/article_slug" hx-target="#comments" fenctype=multipart/form-data>
+            <form hx-post="{{ prefix }}/article_slug" hx-target="#comments" fenctype=multipart/form-data>
                 <input type="text" id="comment_contact" name="comment_contact" placeholder="Name, e-mail" required></input><br>
                 <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
                 <input id="submit" class="custom-file-upload" type=submit value=Submit>
@@ -210,13 +214,13 @@ def create_new_comment(author: str, comment: str, comment_fname: str, slug: str)
         app_log.error(f"File {p} already exists, skipping comment!")
 
 
-@app.route(PREFIX + '/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        return html_index
+        return rtemplate.render(prefix=URL_PREFIX)
 
 
-@app.route(PREFIX + '/article_slug', methods=['GET', 'POST'])
+@app.route('/article_slug', methods=['GET', 'POST'])
 def comments_for_article():
     if request.method == 'GET':
         comments = get_comments_for_slug('article_slug')
