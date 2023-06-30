@@ -107,11 +107,11 @@ html_index = '''\
         </div>
 
         <!-- swap self for comments, for this article -->
-        <div style="grid-row: 1" id="comments" hx-get="{{ prefix }}/article_slug" hx-swap="innerHTML" hx-trigger="load">
+        <div style="grid-row: 1" id="comments" hx-get="{{ prefix }}" hx-vals='{"for": "article_slug"}' hx-swap="innerHTML" hx-trigger="load">
         </div>
 
         <div style="grid-row: 2; padding-bottom: 100px;">
-            <form hx-post="{{ prefix }}/article_slug" hx-target="#comments" fenctype=multipart/form-data>
+            <form hx-post="{{ prefix }}" hx-vals='{"for": "article_slug"}' hx-target="#comments" fenctype=multipart/form-data>
                 <input type="text" id="comment_contact" name="comment_contact" placeholder="Name, e-mail" required></input><br>
                 <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
                 <input id="submit" class="custom-file-upload" type=submit value=Submit>
@@ -219,26 +219,33 @@ def index():
     if request.method == 'GET':
         return rtemplate.render(prefix=URL_PREFIX)
 
+        # I guess this could be a way to disable rendering an entire website.
+        # So a release mode solution?
+        # return redirect(url_for(URL_PREFIX))
 
-@app.route('/article_slug', methods=['GET', 'POST'])
+
+@app.route(URL_PREFIX, methods=['GET', 'POST'])
 def comments_for_article():
+    which = request.values.get('for', None)
     if request.method == 'GET':
-        comments = get_comments_for_slug('article_slug')
+        if which:
+            comments = get_comments_for_slug(which)
+        else:
+            comments = ""
         ret = templ_comments.render(comments=comments)
         return ret
     if request.method == 'POST':
         app_log.info(f"Got form: {request.form.to_dict()}")
-        path = request.path.replace('/', '')
         author = request.form.to_dict().get('comment_contact').strip()
 
         try:
             author_name, author_email = author.split(',')
             comment = request.form.to_dict().get('comment').strip()
             comment_fname = str(ulid.new())
-            create_new_comment(author_name, comment, comment_fname , path)
+            create_new_comment(author_name, comment, comment_fname , which)
         except ValueError:
             app_log.error(f"Failed to extract the author's name and email from {request.form.to_dict()}")
 
-        comments = get_comments_for_slug('article_slug')
+        comments = get_comments_for_slug(which)
         ret = templ_comments.render(comments=comments)
         return ret
