@@ -107,11 +107,11 @@ html_index = '''\
         </div>
 
         <!-- swap self for comments, for this article -->
-        <div style="grid-row: 1" id="comments" hx-get="{{ prefix }}" hx-vals='{"for": "article_slug"}' hx-swap="innerHTML" hx-trigger="load">
+        <div style="grid-row: 1" id="comments" hx-get="{{ prefix }}/comments" hx-vals='{"for": "article_slug"}' hx-swap="innerHTML" hx-trigger="load">
         </div>
 
         <div style="grid-row: 2; padding-bottom: 100px;">
-            <form hx-post="{{ prefix }}" hx-vals='{"for": "article_slug"}' hx-target="#comments" fenctype=multipart/form-data>
+            <form hx-post="{{ prefix }}/comments" hx-vals='{"for": "article_slug"}' hx-target="#comments" fenctype=multipart/form-data>
                 <input type="text" id="comment_contact" name="comment_contact" placeholder="Name, e-mail" required></input><br>
                 <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
                 <input id="submit" class="custom-file-upload" type=submit value=Submit>
@@ -222,9 +222,10 @@ def index():
         # I guess this could be a way to disable rendering an entire website.
         # So a release mode solution?
         # return redirect(url_for(URL_PREFIX))
+        return "no"
 
 
-@app.route(URL_PREFIX, methods=['GET', 'POST'])
+@app.route("/comments", methods=['GET', 'POST'])
 def comments_for_article():
     which = request.values.get('for', None)
     if request.method == 'GET':
