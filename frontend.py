@@ -14,6 +14,7 @@ from datetime import date, datetime
 import logging, logging.config
 from enum import IntEnum, unique
 
+import params
 
 COMMENTS_DIR = "comments"
 # I currently assume that NGINX will proxy to /. The HTMX
@@ -228,25 +229,30 @@ def index():
 @app.route("/comments", methods=['GET', 'POST'])
 def comments_for_article():
     which = request.values.get('for', None)
-    if request.method == 'GET':
-        if which:
+
+    if which in params.KNOWN_SLUGS:
+        if request.method == 'GET':
+            if which:
+                comments = get_comments_for_slug(which)
+            else:
+                comments = ""
+            ret = templ_comments.render(comments=comments)
+            return ret
+        if request.method == 'POST':
+            app_log.info(f"Got form: {request.form.to_dict()}")
+            author = request.form.to_dict().get('comment_contact').strip()
+
+            try:
+                author_name, author_email = author.split(',')
+                comment = request.form.to_dict().get('comment').strip()
+                comment_fname = str(ulid.new())
+                create_new_comment(author_name, comment, comment_fname , which)
+            except ValueError:
+                app_log.error(f"Failed to extract the author's name and email from {request.form.to_dict()}")
+
             comments = get_comments_for_slug(which)
-        else:
-            comments = ""
-        ret = templ_comments.render(comments=comments)
-        return ret
-    if request.method == 'POST':
-        app_log.info(f"Got form: {request.form.to_dict()}")
-        author = request.form.to_dict().get('comment_contact').strip()
-
-        try:
-            author_name, author_email = author.split(',')
-            comment = request.form.to_dict().get('comment').strip()
-            comment_fname = str(ulid.new())
-            create_new_comment(author_name, comment, comment_fname , which)
-        except ValueError:
-            app_log.error(f"Failed to extract the author's name and email from {request.form.to_dict()}")
-
-        comments = get_comments_for_slug(which)
-        ret = templ_comments.render(comments=comments)
-        return ret
+            ret = templ_comments.render(comments=comments)
+            return ret
+    else:
+        app_log.error(f"Slug '{which}' not known!")
+        return "no"
