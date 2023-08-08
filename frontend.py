@@ -250,7 +250,7 @@ def comments_for_article():
                 author_name, author_email = author.split(',')
                 comment = request.form.to_dict().get('comment').strip()
                 comment_fname = str(ulid.new())
-                create_new_comment(author_name, comment, comment_fname , which)
+                create_new_comment(author_name, comment, comment_fname, which)
             except ValueError:
                 app_log.error(f"Failed to extract the author's name and email from {request.form.to_dict()}")
 
