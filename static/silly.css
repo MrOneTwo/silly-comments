@@ -3,13 +3,13 @@
   padding: 1rem;
 }
 
-.comment_author {
+.comment-author {
   flex: 1;
   margin-top: 0px;
   text-align: right;
 }
 
-.comment_date {
+.comment-date {
   flex: 1;
   margin-top: 0px;
   text-align: left;
