@@ -247,7 +247,7 @@ def comments_for_article():
             author = request.form.to_dict().get('comment_contact').strip()
 
             try:
-                author_name, author_email = author.split(',')
+                author_name, author_email = author.split(',', 2)
                 comment = request.form.to_dict().get('comment').strip()
                 comment_fname = str(ulid.new())
                 create_new_comment(author_name, comment, comment_fname, which)
