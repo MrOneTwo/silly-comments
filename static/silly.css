@@ -3,6 +3,10 @@
   padding: 1rem;
 }
 
+.comment-meta {
+  display: flex;
+}
+
 .comment-author {
   flex: 1;
   margin-top: 0px;

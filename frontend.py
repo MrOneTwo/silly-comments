@@ -128,7 +128,7 @@ html_comments = '''\
 <link rel="stylesheet" href="static/silly.css">
 {%- for c in comments %}
 <div class="comment">
-    <div style="display: flex">
+    <div class="comment-meta">
         <div class="comment-date">
             <span>{{ c.created_on_dt.date() }}</span>
             <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
