@@ -1,7 +1,7 @@
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from pathlib import Path
-from jinja2 import Environment, BaseLoader
+from jinja2 import Environment, BaseLoader, DictLoader
 import yaml
 import ulid
 
@@ -124,29 +124,33 @@ html_index = '''\
 </html>
 '''
 
-html_comments = '''
-    {%- for c in comments %}
-    <div class="comment">
-        <div style="display: flex">
-            <div class="comment_date">
-                <span>{{ c.created_on_dt.date() }}</span>
-                <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
-            </div>
-            <div class="comment_author">
-                {{ c.created_by }}
-            </div>
+html_comments = '''\
+{%- for c in comments %}
+<div class="comment">
+    <div style="display: flex">
+        <div class="comment_date">
+            <span>{{ c.created_on_dt.date() }}</span>
+            <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
         </div>
-        {%- for p in c.paragraphs %}
-        <p>
-            {{ p }}
-        </p>
-        {%- endfor %}
+        <div class="comment_author">
+            {{ c.created_by }}
+        </div>
     </div>
+    {%- for p in c.paragraphs %}
+    <p>
+        {{ p }}
+    </p>
     {%- endfor %}
-    '''
+</div>
+{%- endfor %}
+'''
 
-rtemplate = Environment(loader=BaseLoader).from_string(html_index)
-templ_comments = Environment(loader=BaseLoader).from_string(html_comments)
+load = DictLoader(
+    {"templ_comments": html_comments,
+     "templ_index": html_index,
+    }
+)
+env = Environment(loader=load)
 
 # - end --- HTML functions ------------------------------------------------------------------------
 
@@ -218,7 +222,7 @@ def create_new_comment(author: str, comment: str, comment_fname: str, slug: str)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        return rtemplate.render(prefix=URL_PREFIX)
+        return env.get_template('templ_index').render(prefix=URL_PREFIX)
 
         # I guess this could be a way to disable rendering an entire website.
         # So a release mode solution?
@@ -236,7 +240,7 @@ def comments_for_article():
                 comments = get_comments_for_slug(which)
             else:
                 comments = ""
-            ret = templ_comments.render(comments=comments)
+            ret = env.get_template('templ_comments').render(comments=comments)
             return ret
         if request.method == 'POST':
             app_log.info(f"Got form: {request.form.to_dict()}")
@@ -251,7 +255,7 @@ def comments_for_article():
                 app_log.error(f"Failed to extract the author's name and email from {request.form.to_dict()}")
 
             comments = get_comments_for_slug(which)
-            ret = templ_comments.render(comments=comments)
+            ret = env.get_template('templ_comments').render(comments=comments)
             return ret
     else:
         app_log.error(f"Slug '{which}' not known!")
