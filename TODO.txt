@@ -1,2 +1,4 @@
 - break down into demo index.html webpage and the app that only serves comments
-- filter the request URL that can create and view comments
+- there should be an API endpoing for grabbing the POST form. Basically the usage page should access
+an endpoint which returns a form. That way the submit form can evolve on the server side, without
+client side updates.
