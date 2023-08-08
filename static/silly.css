@@ -1,4 +1,10 @@
+:root {
+--font-size: 14px;
+--font-size-half: 10px;
+}
+
 .comment {
+  font-size: var(--font-size);
   border-style: solid;
   padding: 1rem;
 }
