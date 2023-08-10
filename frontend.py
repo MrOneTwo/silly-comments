@@ -2,7 +2,6 @@ from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
 from pathlib import Path
 from jinja2 import Environment, BaseLoader, DictLoader
-import yaml
 import ulid
 
 import os
