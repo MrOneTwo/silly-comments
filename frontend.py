@@ -48,7 +48,8 @@ logging.config.dictConfig({
         },
         'my_logger': {
             'level': 'INFO',
-            'handlers': ['log_file'],
+            # 'handlers': ['log_file'],
+            'handlers': ['wsgi'],
             'propagate': False
         }
     }
@@ -233,6 +234,13 @@ def index():
 @app.route("/comments", methods=['GET', 'POST'])
 def comments_for_article():
     which = request.values.get('for', None)
+
+    # The request path might look like ?for=project/a_project, to support putting
+    # comments in a more complex filesystem structure.
+    which_list = which.split('/')
+    which = which_list[-1]
+    which_path = which_list[:-1]
+    app_log.info(f"{Path(*which_path)}, {which}")
 
     if which in params.KNOWN_SLUGS:
         if request.method == 'GET':
