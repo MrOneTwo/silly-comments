@@ -248,7 +248,8 @@ def comments_for_article():
                 comments = get_comments_for_slug(which)
             else:
                 comments = ""
-            ret = env.get_template('templ_comments').render(comments=comments)
+            ret = Response(env.get_template('templ_comments').render(comments=comments))
+            ret.headers['Access-Control-Allow-Origin'] = '*'
             return ret
 
         if request.method == 'POST':
@@ -264,7 +265,7 @@ def comments_for_article():
                 app_log.error(f"Failed to extract the author's name and email from {request.form.to_dict()}")
 
             comments = get_comments_for_slug(which)
-            ret = env.get_template('templ_comments').render(comments=comments)
+            ret = Response(env.get_template('templ_comments').render(comments=comments))
             return ret
 
         # Let's handle the preflight request.
@@ -272,7 +273,9 @@ def comments_for_article():
             ret = Response("")
             ret.headers['Access-Control-Allow-Origin'] = '*'
             ret.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT'
-            ret.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+            # This was important to set to '*'. 'Content-Type' was used before
+            # and it didn't work.
+            ret.headers['Access-Control-Allow-Headers'] = '*'
             ret.headers['Access-Control-Max-Age'] = '300'
             return ret
     else:
