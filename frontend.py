@@ -15,7 +15,6 @@ from enum import IntEnum, unique
 
 import params
 
-COMMENTS_DIR = "comments"
 # I currently assume that NGINX will proxy to /. The HTMX
 # requests have to send requests to correct URL though.
 # That's what URL_PREFIX is for.
@@ -156,9 +155,9 @@ env = Environment(loader=load)
 # - end --- HTML functions ------------------------------------------------------------------------
 
 def get_comments_for_slug(slug: str):
-    paths = list(Path(COMMENTS_DIR, slug).glob('*.txt'))
+    paths = list(Path(params.COMMENTS_DIR, slug).glob('*.txt'))
     comments = list()
-    app_log.info(f"Reading comments from {Path(COMMENTS_DIR, slug)}")
+    app_log.info(f"Reading comments from {Path(params.COMMENTS_DIR, slug)}")
     app_log.info(f"{paths}")
 
     for comment_file in paths:
@@ -204,10 +203,10 @@ def get_comments_for_slug(slug: str):
 def create_new_comment(author: str, comment: str, comment_fname: str, slug: str):
     app_log.info(f"Creating new comment from {author}")
 
-    if not Path(COMMENTS_DIR, slug).exists():
-        Path(COMMENTS_DIR, slug).mkdir(parents=True)
+    if not Path(params.COMMENTS_DIR, slug).exists():
+        Path(params.COMMENTS_DIR, slug).mkdir(parents=True)
 
-    p = Path(COMMENTS_DIR, slug, comment_fname).with_suffix('.txt')
+    p = Path(params.COMMENTS_DIR, slug, comment_fname).with_suffix('.txt')
 
     try:
         with p.open(mode='x') as new_comment_file:
