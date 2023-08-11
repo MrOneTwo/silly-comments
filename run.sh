@@ -1,1 +1,1 @@
-flask --app frontend.py run -p 8000
+flask --app frontend.py run -p 32160

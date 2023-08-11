@@ -1,4 +1,4 @@
-from flask import Flask, flash, request, redirect, url_for
+from flask import Flask, flash, request, redirect, url_for, Response
 from werkzeug.utils import secure_filename
 from pathlib import Path
 from jinja2 import Environment, BaseLoader, DictLoader
@@ -231,7 +231,7 @@ def index():
         return "no"
 
 
-@app.route("/comments", methods=['GET', 'POST'])
+@app.route("/comments", methods=['GET', 'POST', 'OPTIONS'])
 def comments_for_article():
     which = request.values.get('for', None)
 
@@ -243,6 +243,7 @@ def comments_for_article():
     app_log.info(f"{Path(*which_path)}, {which}")
 
     if which in params.KNOWN_SLUGS:
+
         if request.method == 'GET':
             if which:
                 comments = get_comments_for_slug(which)
@@ -250,6 +251,7 @@ def comments_for_article():
                 comments = ""
             ret = env.get_template('templ_comments').render(comments=comments)
             return ret
+
         if request.method == 'POST':
             app_log.info(f"Got form: {request.form.to_dict()}")
             author = request.form.to_dict().get('comment_contact').strip()
@@ -264,6 +266,15 @@ def comments_for_article():
 
             comments = get_comments_for_slug(which)
             ret = env.get_template('templ_comments').render(comments=comments)
+            return ret
+
+        # Let's handle the preflight request.
+        if request.method == 'OPTIONS':
+            ret = Response("")
+            ret.headers['Access-Control-Allow-Origin'] = '*'
+            ret.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT'
+            ret.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+            ret.headers['Access-Control-Max-Age'] = '300'
             return ret
     else:
         app_log.error(f"Slug '{which}' not known!")
