@@ -1,0 +1,20 @@
+name: Simple test so I can sleep better
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Install env
+      run: |
+        pip install -r requirements.txt
+        setsid bash run.sh
+        sleep 2
+        curl -v "http://localhost:32160/comments?for=example"
+
