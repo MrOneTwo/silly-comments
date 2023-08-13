@@ -154,8 +154,8 @@ env = Environment(loader=load)
 
 # - end --- HTML functions ------------------------------------------------------------------------
 
-def get_comments_for_slug(slug: str):
-    paths = list(Path(params.COMMENTS_DIR, slug).glob('*.txt'))
+def get_comments_for_slug(slug: str, path: list=[]):
+    paths = list(Path(params.COMMENTS_DIR, *path, slug).glob('*.txt'))
     comments = list()
     app_log.info(f"Reading comments from {Path(params.COMMENTS_DIR, slug)}")
     app_log.info(f"{paths}")
@@ -236,16 +236,16 @@ def comments_for_article():
 
     # The request path might look like ?for=project/a_project, to support putting
     # comments in a more complex filesystem structure.
-    which_list = which.split('/')
+    which_list = [x for x in which.split('/') if len(x) > 0 ]
     which = which_list[-1]
     which_path = which_list[:-1]
-    app_log.info(f"{Path(*which_path)}, {which}")
+    app_log.info(f"path: {Path(*which_path)}, slug: {which}")
 
     if which in params.KNOWN_SLUGS:
 
         if request.method == 'GET':
             if which:
-                comments = get_comments_for_slug(which)
+                comments = get_comments_for_slug(which, which_path)
             else:
                 comments = ""
             ret = Response(env.get_template('templ_comments').render(comments=comments))
@@ -264,7 +264,7 @@ def comments_for_article():
             except ValueError:
                 app_log.error(f"Failed to extract the author's name and email from {request.form.to_dict()}")
 
-            comments = get_comments_for_slug(which)
+            comments = get_comments_for_slug(which, which_path)
             ret = Response(env.get_template('templ_comments').render(comments=comments))
             return ret
 
