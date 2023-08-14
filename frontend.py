@@ -128,19 +128,21 @@ html_comments = '''\
 {%- for c in comments %}
 <div class="comment">
     <div class="comment-meta">
+        <div class="comment-author">
+            {{ c.created_by }}
+        </div>
         <div class="comment-date">
             <span>{{ c.created_on_dt.date() }}</span>
             <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
         </div>
-        <div class="comment-author">
-            {{ c.created_by }}
-        </div>
     </div>
+    <div class="comment-content">
     {%- for p in c.paragraphs %}
     <p>
         {{ p }}
     </p>
     {%- endfor %}
+    </div>
 </div>
 {%- endfor %}
 '''
