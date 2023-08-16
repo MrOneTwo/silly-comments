@@ -4,7 +4,7 @@ BOLD=`tput bold`
 RESET=`tput sgr0`
 
 run() {
-  flask --app frontend.py run -p 32160
+  flask --app frontend.py run -p 32168
 }
 
 deploy() {

@@ -108,15 +108,7 @@ html_index = '''\
         </div>
 
         <!-- swap self for comments, for this article -->
-        <div style="grid-row: 1" id="comments" hx-get="{{ prefix }}/comments" hx-vals='{"for": "article_slug"}' hx-swap="innerHTML" hx-trigger="load">
-        </div>
-
-        <div style="grid-row: 2; padding-bottom: 100px;">
-            <form hx-post="{{ prefix }}/comments" hx-vals='{"for": "article_slug"}' hx-target="#comments" fenctype=multipart/form-data>
-                <input type="text" id="comment_contact" name="comment_contact" placeholder="Name, e-mail" required></input><br>
-                <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
-                <input id="submit" class="custom-file-upload" type=submit value=Submit>
-            </form>
+        <div style="grid-row: 1" id="comments" hx-get="{{ prefix }}/comments" hx-vals='{"for": "example"}' hx-swap="innerHTML" hx-trigger="load">
         </div>
 
     </div>
@@ -126,27 +118,39 @@ html_index = '''\
 
 html_comments = '''\
 <link rel="stylesheet" href="static/silly.css">
-{%- for c in comments %}
-<div class="comment">
-    <div class="comment-meta">
-        <div class="comment-author">
-            <span>{{ c.created_by }}</span>
-            <span>{{ c.created_by_contact }}</span>
+
+<div class="comments">
+    {%- for c in comments %}
+    <div class="comment">
+        <div class="comment-meta">
+            <div class="comment-author">
+                <span>{{ c.created_by }}</span>
+                <span>{{ c.created_by_contact }}</span>
+            </div>
+            <div class="comment-date">
+                <span>{{ c.created_on_dt.date() }}</span>
+                <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
+            </div>
         </div>
-        <div class="comment-date">
-            <span>{{ c.created_on_dt.date() }}</span>
-            <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
+        <div class="comment-content">
+        {%- for p in c.paragraphs %}
+        <p>
+            {{ p }}
+        </p>
+        {%- endfor %}
         </div>
     </div>
-    <div class="comment-content">
-    {%- for p in c.paragraphs %}
-    <p>
-        {{ p }}
-    </p>
     {%- endfor %}
-    </div>
 </div>
-{%- endfor %}
+
+<div class="comment-submit">
+    <form hx-post="/comments" hx-vals='{"for": {{ which }} }' hx-target="#comments" fenctype=multipart/form-data>
+        <input type="text" id="comment_author" name="comment_author" placeholder="Name" required></input><br>
+        <input type="text" id="comment_contact" name="comment_contact" placeholder="e-mail or other contact info"></input><br>
+        <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
+        <input id="submit" class="custom-file-upload" type=submit value=Submit>
+    </form>
+</div>
 '''
 
 load = DictLoader(
@@ -226,7 +230,7 @@ def create_new_comment(author_name: str, author_contact: str, comment: str, comm
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        return env.get_template('templ_index').render(prefix=URL_PREFIX)
+        return env.get_template('templ_index').render()
 
         # I guess this could be a way to disable rendering an entire website.
         # So a release mode solution?
@@ -252,26 +256,26 @@ def comments_for_article():
                 comments = get_comments_for_slug(which, which_path)
             else:
                 comments = ""
-            ret = Response(env.get_template('templ_comments').render(comments=comments))
+            ret = Response(env.get_template('templ_comments').render(which=which, comments=comments))
             ret.headers['Access-Control-Allow-Origin'] = '*'
             return ret
 
         if request.method == 'POST':
             form = request.form.to_dict()
             app_log.info(f"Got form: {form}")
-            author = form.get('comment_contact').strip()
+            author = form.get('comment_author').strip()
+            author_contact = form.get('comment_contact').strip()
 
             try:
                 # split with value 1 will create two elements.
-                author_name, author_email = [i.strip() for i in author.split(',', 1)]
                 comment = form.get('comment').strip()
                 comment_fname = str(ulid.new())
-                create_new_comment(author_name, author_contact, comment, comment_fname, which)
+                create_new_comment(author, author_contact, comment, comment_fname, which)
             except ValueError:
                 app_log.error(f"Failed to extract the author's name and email from {form}")
 
             comments = get_comments_for_slug(which, which_path)
-            ret = Response(env.get_template('templ_comments').render(comments=comments))
+            ret = Response(env.get_template('templ_comments').render(which=which, comments=comments))
             return ret
 
         # Let's handle the preflight request.
