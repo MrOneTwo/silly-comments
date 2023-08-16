@@ -116,10 +116,11 @@ html_index = '''\
 </html>
 '''
 
+'''
+    <link rel="stylesheet" href="static/silly.css">
+'''
 html_comments = '''\
 <div id="comments">
-    <link rel="stylesheet" href="static/silly.css">
-
     <div class="comments">
         {%- for c in comments %}
         <div class="comment">
