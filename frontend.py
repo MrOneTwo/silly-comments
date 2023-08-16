@@ -63,6 +63,7 @@ class Comment():
         self.created_on_ts = 0
         self.created_on_dt = 0
         self.created_by = ""
+        self.created_by_contact = ""
         self.paragraphs = list()
 
 
@@ -129,7 +130,8 @@ html_comments = '''\
 <div class="comment">
     <div class="comment-meta">
         <div class="comment-author">
-            {{ c.created_by }}
+            <span>{{ c.created_by }}</span>
+            <span>{{ c.created_by_contact }}</span>
         </div>
         <div class="comment-date">
             <span>{{ c.created_on_dt.date() }}</span>
@@ -202,8 +204,8 @@ def get_comments_for_slug(slug: str, path: list=[]):
     return comments
 
 
-def create_new_comment(author: str, comment: str, comment_fname: str, slug: str):
-    app_log.info(f"Creating new comment from {author}")
+def create_new_comment(author_name: str, author_contact: str, comment: str, comment_fname: str, slug: str):
+    app_log.info(f"Creating new comment from {author_name}, {author_contact}")
 
     if not Path(params.COMMENTS_DIR, slug).exists():
         Path(params.COMMENTS_DIR, slug).mkdir(parents=True)
@@ -212,7 +214,7 @@ def create_new_comment(author: str, comment: str, comment_fname: str, slug: str)
 
     try:
         with p.open(mode='x') as new_comment_file:
-            new_comment_file.write(author)
+            new_comment_file.write(f"{author_name},{author_contact}")
             new_comment_file.write("\n\n")
             new_comment_file.write(comment)
             new_comment_file.write("\n")
@@ -264,7 +266,7 @@ def comments_for_article():
                 author_name, author_email = [i.strip() for i in author.split(',', 1)]
                 comment = form.get('comment').strip()
                 comment_fname = str(ulid.new())
-                create_new_comment(author_name, comment, comment_fname, which)
+                create_new_comment(author_name, author_contact, comment, comment_fname, which)
             except ValueError:
                 app_log.error(f"Failed to extract the author's name and email from {form}")
 
