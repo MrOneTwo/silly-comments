@@ -243,6 +243,9 @@ def index():
 
 @app.route("/comments", methods=['GET', 'POST', 'OPTIONS'])
 def comments_for_article():
+
+    app_log.info(request.args)
+
     # Let's handle the preflight request.
     if request.method == 'OPTIONS':
         ret = Response("")
