@@ -218,8 +218,8 @@ def create_new_comment(author_name: str, author_contact: str, comment: str, comm
 
     try:
         with p.open(mode='x') as new_comment_file:
-            new_comment_file.write(f"{author_name},{author_contact}")
-            new_comment_file.write("\n\n")
+            new_comment_file.write(f"{author_name},{author_contact}\n")
+            new_comment_file.write("\n")
             new_comment_file.write(comment)
             new_comment_file.write("\n")
             app_log.info(f"Comment saved to {p}")
@@ -289,5 +289,5 @@ def comments_for_article():
             ret.headers['Access-Control-Max-Age'] = '300'
             return ret
     else:
-        app_log.error(f"Slug '{which}' not known!")
+        app_log.error(f"Slug '{which}' not known, check params.py!")
         return "no"
