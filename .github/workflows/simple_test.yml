@@ -13,12 +13,12 @@ jobs:
         fetch-depth: 0
     - name: Install env
       run: |
+        sudo apt install nodejs npm && npm i -g html-validate
         pip install -r requirements.txt
     - name: Test the endpoints
       run: |
         bash cmd.sh run &
         sleep 2
         curl -v "http://localhost:32168/comments?for=example" > example.html
-        sudo apt install nodejs npm && npm i -g html-validate
         html-validate example.html
 
