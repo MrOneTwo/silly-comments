@@ -273,7 +273,7 @@ def comments_for_article():
                 comments = get_comments_for_slug(which, which_path)
             else:
                 comments = ""
-            ret = Response(env.get_template('templ_comments').render(which=which, comments=comments))
+            ret = Response(env.get_template('templ_comments').render(which='/'.join(which_list), comments=comments))
             # Needs to be present in OPTIONS response and here.
             ret.headers['Access-Control-Allow-Origin'] = '*'
             return ret
