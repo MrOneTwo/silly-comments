@@ -20,9 +20,12 @@ jobs:
         bash cmd.sh run &
         sleep 2
         curl -v "http://localhost:32168/comments?for=example" > out.html
+        cat out.html
         html-validate out.html
         curl -v "http://localhost:32168/comments?for=example/deeper" > out.html
+        cat out.html
         html-validate out.html
         curl -v "http://localhost:32168/comments?for=/example/deeper" > out.html
+        cat out.html
         html-validate out.html
 
