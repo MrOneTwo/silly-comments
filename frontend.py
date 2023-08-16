@@ -144,11 +144,11 @@ html_comments = '''\
 </div>
 
 <div class="comment-submit">
-    <form hx-post="/comments" hx-vals='{"for": {{ which }} }' hx-target="#comments" fenctype=multipart/form-data>
+    <form hx-post="/comments" hx-vals='{"for": {{ which }} }' hx-target="#comments" fenctype="multipart/form-data">
         <input type="text" id="comment_author" name="comment_author" placeholder="Name" required><br>
         <input type="text" id="comment_contact" name="comment_contact" placeholder="e-mail or other contact info"><br>
         <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
-        <input id="submit" class="custom-file-upload" type="submit" value="Submit">
+        <button id="submit" class="custom-file-upload" type="submit">Submit</button>
     </form>
 </div>
 '''
