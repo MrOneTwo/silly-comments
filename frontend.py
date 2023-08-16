@@ -211,17 +211,17 @@ def get_comments_for_slug(slug: str, path: list=[]):
     return comments
 
 
-def create_new_comment(author_name: str, author_contact: str, comment: str, comment_fname: str, slug: str):
+def create_new_comment(author_name: str, author_contact: str, comment: str, comment_fname: str, path_list: list):
     app_log.info(f"Creating new comment:")
-    app_log.info(f"{author_name}")
-    app_log.info(f"{author_contact}")
-    app_log.info(f"{comment_fname}")
-    app_log.info(f"{slug}")
+    app_log.info(f"  {author_name}")
+    app_log.info(f"  {author_contact}")
+    app_log.info(f"  {path_list}")
+    app_log.info(f"  {comment_fname}")
 
-    if not Path(params.COMMENTS_DIR, slug).exists():
-        Path(params.COMMENTS_DIR, slug).mkdir(parents=True)
+    if not Path(params.COMMENTS_DIR, *path_list).exists():
+        Path(params.COMMENTS_DIR, *path_list).mkdir(parents=True)
 
-    p = Path(params.COMMENTS_DIR, slug, comment_fname).with_suffix('.txt')
+    p = Path(params.COMMENTS_DIR, *path_list, comment_fname).with_suffix('.txt')
 
     try:
         with p.open(mode='x') as new_comment_file:
@@ -292,7 +292,7 @@ def comments_for_article():
                 # split with value 1 will create two elements.
                 comment = form.get('comment').strip()
                 comment_fname = str(ulid.new())
-                create_new_comment(author, author_contact, comment, comment_fname, which)
+                create_new_comment(author, author_contact, comment, comment_fname, which_list)
             except ValueError:
                 app_log.error(f"Failed to extract the author's name and email from {form}")
 
