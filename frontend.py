@@ -242,6 +242,17 @@ def index():
 
 @app.route("/comments", methods=['GET', 'POST', 'OPTIONS'])
 def comments_for_article():
+    # Let's handle the preflight request.
+    if request.method == 'OPTIONS':
+        ret = Response("")
+        ret.headers['Access-Control-Allow-Origin'] = '*'
+        ret.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT'
+        # This was important to set to '*'. 'Content-Type' was used before
+        # and it didn't work.
+        ret.headers['Access-Control-Allow-Headers'] = '*'
+        ret.headers['Access-Control-Max-Age'] = '300'
+        return ret
+
     which = request.values.get('for', None)
 
     # The request path might look like ?for=project/a_project, to support putting
@@ -280,16 +291,7 @@ def comments_for_article():
             ret = Response(env.get_template('templ_comments').render(which=which, comments=comments))
             return ret
 
-        # Let's handle the preflight request.
-        if request.method == 'OPTIONS':
-            ret = Response("")
-            ret.headers['Access-Control-Allow-Origin'] = '*'
-            ret.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT'
-            # This was important to set to '*'. 'Content-Type' was used before
-            # and it didn't work.
-            ret.headers['Access-Control-Allow-Headers'] = '*'
-            ret.headers['Access-Control-Max-Age'] = '300'
-            return ret
+
     else:
         app_log.error(f"Slug '{which}' not known, check params.py!")
         return "no"
