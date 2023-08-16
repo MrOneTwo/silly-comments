@@ -212,7 +212,11 @@ def get_comments_for_slug(slug: str, path: list=[]):
 
 
 def create_new_comment(author_name: str, author_contact: str, comment: str, comment_fname: str, slug: str):
-    app_log.info(f"Creating new comment from {author_name}, {author_contact}")
+    app_log.info(f"Creating new comment:")
+    app_log.info(f"{author_name}")
+    app_log.info(f"{author_contact}")
+    app_log.info(f"{comment_fname}")
+    app_log.info(f"{slug}")
 
     if not Path(params.COMMENTS_DIR, slug).exists():
         Path(params.COMMENTS_DIR, slug).mkdir(parents=True)
