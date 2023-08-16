@@ -255,16 +255,18 @@ def comments_for_article():
             return ret
 
         if request.method == 'POST':
-            app_log.info(f"Got form: {request.form.to_dict()}")
-            author = request.form.to_dict().get('comment_contact').strip()
+            form = request.form.to_dict()
+            app_log.info(f"Got form: {form}")
+            author = form.get('comment_contact').strip()
 
             try:
-                author_name, author_email = author.split(',', 2)
-                comment = request.form.to_dict().get('comment').strip()
+                # split with value 1 will create two elements.
+                author_name, author_email = [i.strip() for i in author.split(',', 1)]
+                comment = form.get('comment').strip()
                 comment_fname = str(ulid.new())
                 create_new_comment(author_name, comment, comment_fname, which)
             except ValueError:
-                app_log.error(f"Failed to extract the author's name and email from {request.form.to_dict()}")
+                app_log.error(f"Failed to extract the author's name and email from {form}")
 
             comments = get_comments_for_slug(which, which_path)
             ret = Response(env.get_template('templ_comments').render(comments=comments))
