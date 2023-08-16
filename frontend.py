@@ -270,6 +270,7 @@ def comments_for_article():
             else:
                 comments = ""
             ret = Response(env.get_template('templ_comments').render(which=which, comments=comments))
+            # Needs to be present in OPTIONS response and here.
             ret.headers['Access-Control-Allow-Origin'] = '*'
             return ret
 
@@ -289,6 +290,8 @@ def comments_for_article():
 
             comments = get_comments_for_slug(which, which_path)
             ret = Response(env.get_template('templ_comments').render(which=which, comments=comments))
+            # Needs to be present in OPTIONS response and here.
+            ret.headers['Access-Control-Allow-Origin'] = '*'
             return ret
 
 
