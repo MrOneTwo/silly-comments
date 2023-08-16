@@ -117,39 +117,41 @@ html_index = '''\
 '''
 
 html_comments = '''\
-<link rel="stylesheet" href="static/silly.css">
+<div id="comments">
+    <link rel="stylesheet" href="static/silly.css">
 
-<div class="comments">
-    {%- for c in comments %}
-    <div class="comment">
-        <div class="comment-meta">
-            <div class="comment-author">
-                <span>{{ c.created_by }}</span>
-                <span>{{ c.created_by_contact }}</span>
+    <div class="comments">
+        {%- for c in comments %}
+        <div class="comment">
+            <div class="comment-meta">
+                <div class="comment-author">
+                    <span>{{ c.created_by }}</span>
+                    <span>{{ c.created_by_contact }}</span>
+                </div>
+                <div class="comment-date">
+                    <span>{{ c.created_on_dt.date() }}</span>
+                    <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
+                </div>
             </div>
-            <div class="comment-date">
-                <span>{{ c.created_on_dt.date() }}</span>
-                <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
+            <div class="comment-content">
+            {%- for p in c.paragraphs %}
+            <p>
+                {{ p }}
+            </p>
+            {%- endfor %}
             </div>
         </div>
-        <div class="comment-content">
-        {%- for p in c.paragraphs %}
-        <p>
-            {{ p }}
-        </p>
         {%- endfor %}
-        </div>
     </div>
-    {%- endfor %}
-</div>
 
-<div class="comment-submit">
-    <form hx-post="/comments" hx-vals='{"for": {{ which }} }' hx-target="#comments" fenctype="multipart/form-data">
-        <input type="text" id="comment_author" name="comment_author" placeholder="Name" required><br>
-        <input type="text" id="comment_contact" name="comment_contact" placeholder="e-mail or other contact info"><br>
-        <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
-        <button id="submit" class="custom-file-upload" type="submit">Submit</button>
-    </form>
+    <div class="comment-submit">
+        <form hx-post="/comments" hx-vals='{"for": {{ which }} }' hx-target="#comments" fenctype="multipart/form-data">
+            <input type="text" id="comment_author" name="comment_author" placeholder="Name" required><br>
+            <input type="text" id="comment_contact" name="comment_contact" placeholder="e-mail or other contact info"><br>
+            <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
+            <button id="submit" class="custom-file-upload" type="submit">Submit</button>
+        </form>
+    </div>
 </div>
 '''
 
