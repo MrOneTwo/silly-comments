@@ -16,13 +16,13 @@
 .comment-author {
   flex: 1;
   margin-top: 0px;
-  text-align: right;
+  text-align: left;
 }
 
 .comment-date {
   flex: 1;
   margin-top: 0px;
-  text-align: left;
+  text-align: right;
 }
 
 .comment-date-minutes {
