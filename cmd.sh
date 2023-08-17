@@ -1,3 +1,11 @@
+#!/usr/bin/env bash
+
+#set -o errexit
+set -o nounset
+set -o pipefail
+
+cd "$(dirname "$0")"
+
 RED=`tput setaf 1`
 GREEN=`tput setaf 2`
 BOLD=`tput bold`
@@ -18,7 +26,7 @@ deploy() {
   rsync -v \
     --exclude '.git' \
     --exclude '__pycache__' \
-    * $REMOTE_USER@$REMOTE_SERVER:~/silly-comments/
+    -- * "$REMOTE_USER"@"$REMOTE_SERVER":~/silly-comments/
 }
 
 kill() {
@@ -31,8 +39,8 @@ kill() {
 
   printf "Killing frontend.py...\n"
 
-  pid=$(ssh $REMOTE_USER@$REMOTE_SERVER ps ax | grep frontend.py | awk '{print $1}')
-  printf "frontend.py PID: %d\n" $pid
+  pid=$(ssh "$REMOTE_USER"@"$REMOTE_SERVER" ps ax | grep frontend.py | awk '{print $1}')
+  printf "frontend.py PID: %d\n" "$pid"
 }
 
 "$@"

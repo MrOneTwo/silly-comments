@@ -12,5 +12,5 @@ I want this application to be simple enough that anyone can start it,
 without asking for a Docker image. Low bar, I know.
 
 ```sh
-bash cmd.sh run
+./cmd.sh run
 ```
