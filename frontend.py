@@ -284,6 +284,8 @@ def comments_for_article():
                 comments = get_comments_for_slug(which, which_path)
             else:
                 comments = ""
+            # Need to use the remote URL, since the comment submit form needs to
+            # know where to send the request.
             ret = Response(
                 env.get_template("templ_comments").render(
                     remote=params.REMOTE_URL,
