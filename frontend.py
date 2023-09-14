@@ -18,47 +18,47 @@ import params
 # I currently assume that NGINX will proxy to /. The HTMX
 # requests have to send requests to correct URL though.
 # That's what URL_PREFIX is for.
-URL_PREFIX = "/silly"
+URL_PREFIX = "/comments"
 
-app = Flask(__name__,
-            static_url_path='/static')
+app = Flask(__name__, static_url_path="/static")
 
-logging.config.dictConfig({
-    'version': 1,
-    'formatters': {
-        'default': {'format': '[%(asctime)s] %(levelname)s in %(module)s: %(message)s',}
-    },
-    'handlers': {
-        'wsgi': {
-            'class': 'logging.StreamHandler',
-            'stream': 'ext://flask.logging.wsgi_errors_stream',
-            'formatter': 'default'
+logging.config.dictConfig(
+    {
+        "version": 1,
+        "formatters": {
+            "default": {
+                "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            }
         },
-        'log_file': {
-            'class': 'logging.FileHandler',
-            'filename': 'frontend.log',
-            'formatter': 'default'
+        "handlers": {
+            "wsgi": {
+                "class": "logging.StreamHandler",
+                "stream": "ext://flask.logging.wsgi_errors_stream",
+                "formatter": "default",
+            },
+            "log_file": {
+                "class": "logging.FileHandler",
+                "filename": "frontend.log",
+                "formatter": "default",
+            },
         },
-    },
-    'loggers': {
-        'root': {
-            'level': 'INFO',
-            'handlers': ['wsgi']
+        "loggers": {
+            "root": {"level": "INFO", "handlers": ["wsgi"]},
+            "my_logger": {
+                "level": "INFO",
+                # 'handlers': ['log_file'],
+                "handlers": ["wsgi"],
+                "propagate": False,
+            },
         },
-        'my_logger': {
-            'level': 'INFO',
-            # 'handlers': ['log_file'],
-            'handlers': ['wsgi'],
-            'propagate': False
-        }
     }
-})
+)
 
-app_log = logging.getLogger('my_logger')
+app_log = logging.getLogger("my_logger")
 app_log.info("------------------ Started the app ------------------")
 
 
-class Comment():
+class Comment:
     def __init__(self):
         self.created_on_ts = 0
         self.created_on_dt = 0
@@ -70,7 +70,7 @@ class Comment():
 # - HTML functions --------------------------------------------------------------------------------
 
 # The \ avoids the empty line.
-html_index = '''\
+html_index = """\
 <!doctype html>
 <head>
     <meta charset="utf-8">
@@ -108,18 +108,18 @@ html_index = '''\
         </div>
 
         <!-- swap self for comments, for this article -->
-        <div style="grid-row: 1" id="comments" hx-get="{{ prefix }}/comments" hx-vals='{"for": "example"}' hx-swap="innerHTML" hx-trigger="load">
+        <div style="grid-row: 1" hx-get="{{ prefix }}/comments" hx-vals='{"for": "example"}' hx-swap="innerHTML" hx-trigger="load">
         </div>
 
     </div>
 </body>
 </html>
-'''
+"""
 
-'''
+"""
     <link rel="stylesheet" href="static/silly.css">
-'''
-html_comments = '''\
+"""
+html_comments = """\
 <div id="comments">
     <div class="comments">
         {%- for c in comments %}
@@ -146,7 +146,7 @@ html_comments = '''\
     </div>
 
     <div class="comment-submit">
-        <form hx-post="/comments" hx-vals='{"for": "{{ which }}" }' hx-target="#comments" enctype="multipart/form-data">
+        <form hx-post="{{ remote }}/{{ endpoint }}" hx-vals='{"for": "{{ which }}" }' hx-target="#comments" enctype="multipart/form-data">
             <input type="text" id="comment_author" name="comment_author" placeholder="Name" required><br>
             <input type="text" id="comment_contact" name="comment_contact" placeholder="e-mail or other contact info"><br>
             <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
@@ -154,19 +154,21 @@ html_comments = '''\
         </form>
     </div>
 </div>
-'''
+"""
 
 load = DictLoader(
-    {"templ_comments": html_comments,
-     "templ_index": html_index,
+    {
+        "templ_comments": html_comments,
+        "templ_index": html_index,
     }
 )
 env = Environment(loader=load)
 
 # - end --- HTML functions ------------------------------------------------------------------------
 
-def get_comments_for_slug(slug: str, path: list=[]):
-    paths = list(Path(params.COMMENTS_DIR, *path, slug).glob('*.txt'))
+
+def get_comments_for_slug(slug: str, path: list = []):
+    paths = list(Path(params.COMMENTS_DIR, *path, slug).glob("*.txt"))
     comments = list()
     app_log.info(f"Reading comments from {Path(params.COMMENTS_DIR, slug)}")
     app_log.info(f"{paths}")
@@ -177,14 +179,14 @@ def get_comments_for_slug(slug: str, path: list=[]):
         # paragraphs.
         comment_raw = comment_file.read_text()
         # Empty lines will show up as zero len string elements.
-        comment_raw_list = comment_raw.split('\n')
+        comment_raw_list = comment_raw.split("\n")
         comment_raw_list_cleaned_up = list()
 
         chunk = ""
         # Iterate until there is no next element.
         for i, line in enumerate(comment_raw_list):
             try:
-                if line == '':
+                if line == "":
                     comment_raw_list_cleaned_up.append(chunk)
                     chunk = ""
                     continue
@@ -211,7 +213,13 @@ def get_comments_for_slug(slug: str, path: list=[]):
     return comments
 
 
-def create_new_comment(author_name: str, author_contact: str, comment: str, comment_fname: str, path_list: list):
+def create_new_comment(
+    author_name: str,
+    author_contact: str,
+    comment: str,
+    comment_fname: str,
+    path_list: list,
+):
     app_log.info(f"Creating new comment:")
     app_log.info(f"  {author_name}")
     app_log.info(f"  {author_contact}")
@@ -221,10 +229,10 @@ def create_new_comment(author_name: str, author_contact: str, comment: str, comm
     if not Path(params.COMMENTS_DIR, *path_list).exists():
         Path(params.COMMENTS_DIR, *path_list).mkdir(parents=True)
 
-    p = Path(params.COMMENTS_DIR, *path_list, comment_fname).with_suffix('.txt')
+    p = Path(params.COMMENTS_DIR, *path_list, comment_fname).with_suffix(".txt")
 
     try:
-        with p.open(mode='x') as new_comment_file:
+        with p.open(mode="x") as new_comment_file:
             new_comment_file.write(f"{author_name},{author_contact}\n")
             new_comment_file.write("\n")
             new_comment_file.write(comment)
@@ -234,10 +242,10 @@ def create_new_comment(author_name: str, author_contact: str, comment: str, comm
         app_log.error(f"File {p} already exists, skipping comment!")
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/", methods=["GET", "POST"])
 def index():
-    if request.method == 'GET':
-        return env.get_template('templ_index').render()
+    if request.method == "GET":
+        return env.get_template("templ_index").render()
 
         # I guess this could be a way to disable rendering an entire website.
         # So a release mode solution?
@@ -245,63 +253,76 @@ def index():
         return "no"
 
 
-@app.route("/comments", methods=['GET', 'POST', 'OPTIONS'])
+@app.route("/comments", methods=["GET", "POST", "OPTIONS"])
 def comments_for_article():
-
     app_log.info(request.args)
 
     # Let's handle the preflight request.
-    if request.method == 'OPTIONS':
+    if request.method == "OPTIONS":
         ret = Response("")
-        ret.headers['Access-Control-Allow-Origin'] = '*'
-        ret.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT'
+        ret.headers["Access-Control-Allow-Origin"] = "*"
+        ret.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT"
         # This was important to set to '*'. 'Content-Type' was used before
         # and it didn't work.
-        ret.headers['Access-Control-Allow-Headers'] = '*'
-        ret.headers['Access-Control-Max-Age'] = '300'
+        ret.headers["Access-Control-Allow-Headers"] = "*"
+        ret.headers["Access-Control-Max-Age"] = "300"
         return ret
 
-    which = request.values.get('for', None)
+    which = request.values.get("for", None)
+    app_log.info(f"request values: {request.values}")
 
     # The request path might look like ?for=project/a_project, to support putting
     # comments in a more complex filesystem structure.
-    which_list = [x for x in which.split('/') if len(x) > 0 ]
+    which_list = [x for x in which.split("/") if len(x) > 0]
     which = which_list[-1]
     which_path = which_list[:-1]
     app_log.info(f"path: {Path(*which_path)}, slug: {which}")
 
     if which in params.KNOWN_SLUGS:
-
-        if request.method == 'GET':
+        if request.method == "GET":
             if which:
                 comments = get_comments_for_slug(which, which_path)
             else:
                 comments = ""
-            ret = Response(env.get_template('templ_comments').render(which='/'.join(which_list), comments=comments))
+            ret = Response(
+                env.get_template("templ_comments").render(
+                    remote=params.REMOTE_URL,
+                    endpoint=URL_PREFIX,
+                    which="/".join(which_list),
+                    comments=comments,
+                )
+            )
             # Needs to be present in OPTIONS response and here.
-            ret.headers['Access-Control-Allow-Origin'] = '*'
+            ret.headers["Access-Control-Allow-Origin"] = "*"
             return ret
 
-        if request.method == 'POST':
+        if request.method == "POST":
             form = request.form.to_dict()
             app_log.info(f"Got form: {form}")
-            author = form.get('comment_author').strip()
-            author_contact = form.get('comment_contact').strip()
+            author = form.get("comment_author").strip()
+            author_contact = form.get("comment_contact").strip()
 
             try:
                 # split with value 1 will create two elements.
-                comment = form.get('comment').strip()
+                comment = form.get("comment").strip()
                 comment_fname = str(ulid.new())
-                create_new_comment(author, author_contact, comment, comment_fname, which_list)
+                create_new_comment(
+                    author, author_contact, comment, comment_fname, which_list
+                )
             except ValueError:
-                app_log.error(f"Failed to extract the author's name and email from {form}")
+                app_log.error(
+                    f"Failed to extract the author's name and email from {form}"
+                )
 
             comments = get_comments_for_slug(which, which_path)
-            ret = Response(env.get_template('templ_comments').render(which=which, comments=comments))
+            ret = Response(
+                env.get_template("templ_comments").render(
+                    which=which, comments=comments
+                )
+            )
             # Needs to be present in OPTIONS response and here.
-            ret.headers['Access-Control-Allow-Origin'] = '*'
+            ret.headers["Access-Control-Allow-Origin"] = "*"
             return ret
-
 
     else:
         app_log.error(f"Slug '{which}' not known, check params.py!")

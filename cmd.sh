@@ -26,6 +26,7 @@ deploy() {
   rsync -v \
     --exclude '.git' \
     --exclude '__pycache__' \
+    --exclude 'venv' \
     -- * "$REMOTE_USER"@"$REMOTE_SERVER":~/silly-comments/
 }
 
