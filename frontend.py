@@ -14,6 +14,7 @@ import logging, logging.config
 from enum import IntEnum, unique
 
 import params
+import notifier
 
 # I currently assume that NGINX will proxy to /. The HTMX
 # requests have to send requests to correct URL though.

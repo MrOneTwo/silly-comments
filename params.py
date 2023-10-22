@@ -6,3 +6,6 @@ KNOWN_SLUGS = (
     "example",
     "deeper"
 )
+
+TELEGRAM_BOT_TOKEN=""
+TELEGRAM_BOT_CHAT_ID=""
