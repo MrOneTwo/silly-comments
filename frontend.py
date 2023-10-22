@@ -109,7 +109,7 @@ html_index = """\
         </div>
 
         <!-- swap self for comments, for this article -->
-        <div style="grid-row: 1" hx-get="{{ prefix }}/comments" hx-vals='{"for": "example"}' hx-swap="innerHTML" hx-trigger="load">
+        <div style="grid-row: 1" hx-get="{{ remote }}/comments" hx-vals='{"for": "example"}' hx-swap="innerHTML" hx-trigger="load">
         </div>
 
     </div>
@@ -246,7 +246,7 @@ def create_new_comment(
 @app.route("/", methods=["GET", "POST"])
 def index():
     if request.method == "GET":
-        return env.get_template("templ_index").render()
+        return env.get_template("templ_index").render(remote=params.REMOTE_URL)
 
         # I guess this could be a way to disable rendering an entire website.
         # So a release mode solution?
