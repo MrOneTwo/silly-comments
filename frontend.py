@@ -305,6 +305,8 @@ def comments_for_article():
             author = form.get("comment_author").strip()
             author_contact = form.get("comment_contact").strip()
 
+            notifier.notify(f"{form}")
+
             try:
                 # split with value 1 will create two elements.
                 comment = form.get("comment").strip()
