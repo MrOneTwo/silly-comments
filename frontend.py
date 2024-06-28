@@ -9,9 +9,11 @@ import subprocess
 import re
 import concurrent.futures
 import threading
+import time
 from datetime import date, datetime
 import logging, logging.config
 from enum import IntEnum, unique
+from importlib import reload
 
 import params
 import notifier
@@ -57,6 +59,32 @@ logging.config.dictConfig(
 
 app_log = logging.getLogger("my_logger")
 app_log.info("------------------ Started the app ------------------")
+
+
+def reload_params():
+    global params
+    def get_ts() -> int:
+        return int(Path("params.py").stat().st_mtime)
+
+    period = 60 * 10
+    timestamp = get_ts()
+
+    app_log.info(f"I'll reload params.py every {period}s")
+
+    time.sleep(5)
+
+    while True:
+        timestamp_fresh = get_ts()
+        if timestamp_fresh > timestamp:
+            app_log.info("Reloading params.py")
+            timestamp = timestamp_fresh
+            params = reload(params)
+
+        time.sleep(period)
+
+
+thr_params_reload = threading.Thread(target=reload_params, daemon=True)
+thr_params_reload.start()
 
 
 class Comment:
