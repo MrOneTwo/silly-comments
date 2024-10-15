@@ -28,4 +28,13 @@ jobs:
         curl -v "http://localhost:32168/comments?for=/example/deeper" > out.html
         cat out.html
         html-validate out.html
-
+        # Create new comment.
+        echo "::group::Creating comments..."
+        curl -v -X POST "http://localhost:32168/comments?for=/example/deeper" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "for=deeper&comment_author=michal&comment_contact=jejku@wp.pl&comment='ble ble ble'"
+        curl -v -X POST "http://localhost:32168/comments?for=/example/deeper" \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "for=deeper&comment_author=bobek&comment_contact=noraczej@wp.pl&comment='nie nie nie'"
+        cat comments/example/deeper/*
+        echo "::endgroup::"
