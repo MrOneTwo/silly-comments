@@ -260,6 +260,19 @@ def create_new_comment(
 
     p = Path(params.COMMENTS_DIR, *path_list, comment_fname).with_suffix(".txt")
 
+    # Order matters. Otherwise '&' of the latter symbols might be replaced
+    # by '&amp'.
+    sanitizers = (
+        lambda s: s.replace('&', '&amp;'),
+        lambda s: s.replace('<', '&lt;'),
+        lambda s: s.replace('>', '&gt;'),
+        lambda s: s.replace('"', '&quot;'),
+        lambda s: s.replace("'", '&#x27;'),
+    )
+
+    for func in sanitizers:
+        comment = func(comment)
+
     try:
         with p.open(mode="x") as new_comment_file:
             new_comment_file.write(f"{author_name},{author_contact}\n")
