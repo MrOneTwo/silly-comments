@@ -363,7 +363,10 @@ def comments_for_article():
             comments = get_comments_for_slug(which, which_path)
             ret = Response(
                 env.get_template("templ_comments").render(
-                    which=which, comments=comments
+                    remote=params.REMOTE_URL,
+                    endpoint=URL_PREFIX,
+                    which="/".join(which_list),
+                    comments=comments
                 )
             )
             # Needs to be present in OPTIONS response and here.
