@@ -151,27 +151,10 @@ html_index = """\
 html_comments = """\
 <div id="comments">
     <div class="comments">
-        {%- for c in comments %}
-        <div class="comment">
-            <div class="comment-meta">
-                <div class="comment-author">
-                    <span>{{ c.created_by }}</span>
-                    <span>{{ c.created_by_contact }}</span>
-                </div>
-                <div class="comment-date">
-                    <span>{{ c.created_on_dt.date() }}</span>
-                    <span>{{ '%02d' % c.created_on_dt.hour }}</span><span>{{ '%02d' % c.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % c.created_on_dt.second }}</span>
-                </div>
-            </div>
-            <div class="comment-content">
-            {%- for p in c.paragraphs %}
-            <p>
-                {{ p }}
-            </p>
-            {%- endfor %}
-            </div>
-        </div>
-        {%- endfor %}
+    {%- import 'templ_comment' as comment -%}
+    {%- for c in comments %}
+        {{ comment.comment(c) -}}
+    {%- endfor -%}
     </div>
 
     <div class="comment-submit">
@@ -189,6 +172,29 @@ load = DictLoader(
     {
         "templ_comments": html_comments,
         "templ_index": html_index,
+        "templ_comment": """
+        {% macro comment(cobject) -%}
+        <div class="comment">
+            <div class="comment-meta">
+                <div class="comment-author">
+                    <span>{{ cobject.created_by }}</span>
+                    <span>{{ cobject.created_by_contact }}</span>
+                </div>
+                <div class="comment-date">
+                    <span>{{ cobject.created_on_dt.date() }}</span>
+                    <span>{{ '%02d' % cobject.created_on_dt.hour }}</span><span>{{ '%02d' % cobject.created_on_dt.minute }}</span><span class="comment-date-seconds">{{ '%02d' % cobject.created_on_dt.second }}</span>
+                </div>
+            </div>
+            <div class="comment-content">
+            {%- for p in cobject.paragraphs %}
+            <p>
+                {{ p }}
+            </p>
+            {%- endfor %}
+            </div>
+        </div>
+        {%- endmacro %}
+        """
     }
 )
 env = Environment(loader=load)
