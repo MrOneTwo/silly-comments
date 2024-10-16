@@ -177,8 +177,8 @@ load = DictLoader(
         <div class="comment">
             <div class="comment-meta">
                 <div class="comment-author">
-                    <span>{{ cobject.created_by }}</span>
-                    <span>{{ cobject.created_by_contact }}</span>
+                    <span>{{ cobject.created_by | e }}</span>
+                    <span>{{ cobject.created_by_contact | e }}</span>
                 </div>
                 <div class="comment-date">
                     <span>{{ cobject.created_on_dt.date() }}</span>
@@ -188,7 +188,7 @@ load = DictLoader(
             <div class="comment-content">
             {%- for p in cobject.paragraphs %}
             <p>
-                {{ p }}
+                {{ p | e }}
             </p>
             {%- endfor %}
             </div>
@@ -265,19 +265,6 @@ def create_new_comment(
         Path(params.COMMENTS_DIR, *path_list).mkdir(parents=True)
 
     p = Path(params.COMMENTS_DIR, *path_list, comment_fname).with_suffix(".txt")
-
-    # Order matters. Otherwise '&' of the latter symbols might be replaced
-    # by '&amp'.
-    sanitizers = (
-        lambda s: s.replace('&', '&amp;'),
-        lambda s: s.replace('<', '&lt;'),
-        lambda s: s.replace('>', '&gt;'),
-        lambda s: s.replace('"', '&quot;'),
-        lambda s: s.replace("'", '&#x27;'),
-    )
-
-    for func in sanitizers:
-        comment = func(comment)
 
     try:
         with p.open(mode="x") as new_comment_file:
