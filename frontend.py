@@ -40,17 +40,18 @@ logging.config.dictConfig(
                 "formatter": "default",
             },
             "log_file": {
-                "class": "logging.FileHandler",
+                "class": "logging.handlers.RotatingFileHandler",
                 "filename": "frontend.log",
                 "formatter": "default",
+                "mode": "a",
+                "maxBytes": 1024 * 1024,
             },
         },
         "loggers": {
             "root": {"level": "INFO", "handlers": ["wsgi"]},
             "my_logger": {
                 "level": "INFO",
-                # 'handlers': ['log_file'],
-                "handlers": ["wsgi"],
+                "handlers": ["wsgi", "log_file"],
                 "propagate": False,
             },
         },
