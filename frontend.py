@@ -45,6 +45,7 @@ logging.config.dictConfig(
                 "formatter": "default",
                 "mode": "a",
                 "maxBytes": 10 * 1024,
+                "backupCount": 1,
             },
         },
         "loggers": {
