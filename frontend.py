@@ -44,7 +44,7 @@ logging.config.dictConfig(
                 "filename": "frontend.log",
                 "formatter": "default",
                 "mode": "a",
-                "maxBytes": 1024 * 1024,
+                "maxBytes": 10 * 1024,
             },
         },
         "loggers": {
