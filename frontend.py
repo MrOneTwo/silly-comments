@@ -23,7 +23,129 @@ import notifier
 # That's what URL_PREFIX is for.
 URL_PREFIX = "/comments"
 
-app = Flask(__name__, static_url_path="/static")
+
+def reload_params():
+    global params
+    def get_ts() -> int:
+        return int(Path("params.py").stat().st_mtime)
+
+    period = 60 * 10
+    timestamp = get_ts()
+
+    app_log.info(f"I'll reload params.py every {period}s")
+
+    time.sleep(5)
+
+    while True:
+        timestamp_fresh = get_ts()
+        if timestamp_fresh > timestamp:
+            app_log.info("Reloading params.py")
+            timestamp = timestamp_fresh
+            params = reload(params)
+
+        time.sleep(period)
+
+
+def create_app():
+    app = Flask(__name__, static_url_path="/static")
+
+    thr_params_reload = threading.Thread(target=reload_params, daemon=True)
+    thr_params_reload.start()
+
+    @app.route("/", methods=["GET", "POST"])
+    def index():
+        if request.method == "GET":
+            return env.get_template("templ_index").render(remote=params.REMOTE_URL)
+
+            # I guess this could be a way to disable rendering an entire website.
+            # So a release mode solution?
+            # return redirect(url_for(URL_PREFIX))
+            return "no"
+
+
+    @app.route("/comments", methods=["GET", "POST", "OPTIONS"])
+    def comments_for_article():
+        app_log.info(request.args)
+
+        # Let's handle the preflight request.
+        if request.method == "OPTIONS":
+            ret = Response("")
+            ret.headers["Access-Control-Allow-Origin"] = "*"
+            ret.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT"
+            # This was important to set to '*'. 'Content-Type' was used before
+            # and it didn't work.
+            ret.headers["Access-Control-Allow-Headers"] = "*"
+            ret.headers["Access-Control-Max-Age"] = "300"
+            return ret
+
+        which = request.values.get("for", None)
+        app_log.info(f"request values: {request.values}")
+
+        # The request path might look like ?for=project/a_project, to support putting
+        # comments in a more complex filesystem structure.
+        which_list = [x for x in which.split("/") if len(x) > 0]
+        which = which_list[-1]
+        which_path = which_list[:-1]
+        app_log.info(f"path: {Path(*which_path)}, slug: {which}")
+
+        if which in params.KNOWN_SLUGS:
+            if request.method == "GET":
+                if which:
+                    comments = get_comments_for_slug(which, which_path)
+                else:
+                    comments = ""
+                # Need to use the remote URL, since the comment submit form needs to
+                # know where to send the request.
+                ret = Response(
+                    env.get_template("templ_comments").render(
+                        remote=params.REMOTE_URL,
+                        endpoint=URL_PREFIX,
+                        which="/".join(which_list),
+                        comments=comments,
+                    )
+                )
+                # Needs to be present in OPTIONS response and here.
+                ret.headers["Access-Control-Allow-Origin"] = "*"
+                return ret
+
+            if request.method == "POST":
+                form = request.form.to_dict()
+                app_log.info(f"Got form: {form}")
+                author = form.get("comment_author").strip()
+                author_contact = form.get("comment_contact").strip()
+
+                notifier.notify(f"{form}")
+
+                try:
+                    # split with value 1 will create two elements.
+                    comment = form.get("comment").strip()
+                    comment_fname = str(ulid.new())
+                    create_new_comment(
+                        author, author_contact, comment, comment_fname, which_list
+                    )
+                except ValueError:
+                    app_log.error(
+                        f"Failed to extract the author's name and email from {form}"
+                    )
+
+                comments = get_comments_for_slug(which, which_path)
+                ret = Response(
+                    env.get_template("templ_comments").render(
+                        remote=params.REMOTE_URL,
+                        endpoint=URL_PREFIX,
+                        which="/".join(which_list),
+                        comments=comments
+                    )
+                )
+                # Needs to be present in OPTIONS response and here.
+                ret.headers["Access-Control-Allow-Origin"] = "*"
+                return ret
+
+        else:
+            app_log.error(f"Slug '{which}' not known, check params.py!")
+            return "no"
+
+    return app
 
 logging.config.dictConfig(
     {
@@ -61,32 +183,6 @@ logging.config.dictConfig(
 
 app_log = logging.getLogger("my_logger")
 app_log.info("------------------ Started the app ------------------")
-
-
-def reload_params():
-    global params
-    def get_ts() -> int:
-        return int(Path("params.py").stat().st_mtime)
-
-    period = 60 * 10
-    timestamp = get_ts()
-
-    app_log.info(f"I'll reload params.py every {period}s")
-
-    time.sleep(5)
-
-    while True:
-        timestamp_fresh = get_ts()
-        if timestamp_fresh > timestamp:
-            app_log.info("Reloading params.py")
-            timestamp = timestamp_fresh
-            params = reload(params)
-
-        time.sleep(period)
-
-
-thr_params_reload = threading.Thread(target=reload_params, daemon=True)
-thr_params_reload.start()
 
 
 class Comment:
@@ -205,6 +301,16 @@ env = Environment(loader=load)
 
 
 def get_comments_for_slug(slug: str, path: list = []):
+
+    """
+    Parameters
+    ----------
+    slug : str
+        The leaf directory name, which stores the comment files.
+    path : list
+        List of directories that build the path to the slug directory.
+        There's params.COMMENTS_DIR prepended to that list.
+    """
     paths = list(Path(params.COMMENTS_DIR, *path, slug).glob("*.txt"))
     comments = list()
     app_log.info(f"Reading comments from {Path(params.COMMENTS_DIR, slug)}")
@@ -278,96 +384,4 @@ def create_new_comment(
     except FileExistsError:
         app_log.error(f"File {p} already exists, skipping comment!")
 
-
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "GET":
-        return env.get_template("templ_index").render(remote=params.REMOTE_URL)
-
-        # I guess this could be a way to disable rendering an entire website.
-        # So a release mode solution?
-        # return redirect(url_for(URL_PREFIX))
-        return "no"
-
-
-@app.route("/comments", methods=["GET", "POST", "OPTIONS"])
-def comments_for_article():
-    app_log.info(request.args)
-
-    # Let's handle the preflight request.
-    if request.method == "OPTIONS":
-        ret = Response("")
-        ret.headers["Access-Control-Allow-Origin"] = "*"
-        ret.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT"
-        # This was important to set to '*'. 'Content-Type' was used before
-        # and it didn't work.
-        ret.headers["Access-Control-Allow-Headers"] = "*"
-        ret.headers["Access-Control-Max-Age"] = "300"
-        return ret
-
-    which = request.values.get("for", None)
-    app_log.info(f"request values: {request.values}")
-
-    # The request path might look like ?for=project/a_project, to support putting
-    # comments in a more complex filesystem structure.
-    which_list = [x for x in which.split("/") if len(x) > 0]
-    which = which_list[-1]
-    which_path = which_list[:-1]
-    app_log.info(f"path: {Path(*which_path)}, slug: {which}")
-
-    if which in params.KNOWN_SLUGS:
-        if request.method == "GET":
-            if which:
-                comments = get_comments_for_slug(which, which_path)
-            else:
-                comments = ""
-            # Need to use the remote URL, since the comment submit form needs to
-            # know where to send the request.
-            ret = Response(
-                env.get_template("templ_comments").render(
-                    remote=params.REMOTE_URL,
-                    endpoint=URL_PREFIX,
-                    which="/".join(which_list),
-                    comments=comments,
-                )
-            )
-            # Needs to be present in OPTIONS response and here.
-            ret.headers["Access-Control-Allow-Origin"] = "*"
-            return ret
-
-        if request.method == "POST":
-            form = request.form.to_dict()
-            app_log.info(f"Got form: {form}")
-            author = form.get("comment_author").strip()
-            author_contact = form.get("comment_contact").strip()
-
-            notifier.notify(f"{form}")
-
-            try:
-                # split with value 1 will create two elements.
-                comment = form.get("comment").strip()
-                comment_fname = str(ulid.new())
-                create_new_comment(
-                    author, author_contact, comment, comment_fname, which_list
-                )
-            except ValueError:
-                app_log.error(
-                    f"Failed to extract the author's name and email from {form}"
-                )
-
-            comments = get_comments_for_slug(which, which_path)
-            ret = Response(
-                env.get_template("templ_comments").render(
-                    remote=params.REMOTE_URL,
-                    endpoint=URL_PREFIX,
-                    which="/".join(which_list),
-                    comments=comments
-                )
-            )
-            # Needs to be present in OPTIONS response and here.
-            ret.headers["Access-Control-Allow-Origin"] = "*"
-            return ret
-
-    else:
-        app_log.error(f"Slug '{which}' not known, check params.py!")
-        return "no"
+    return p

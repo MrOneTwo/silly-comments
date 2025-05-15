@@ -44,4 +44,8 @@ kill() {
   printf "frontend.py PID: %d\n" "$pid"
 }
 
+run_tests() {
+  pytest -rA --setup-show
+}
+
 "$@"
