@@ -1,3 +1,4 @@
 ulid-py
 flask
 requests
+pytest
