@@ -276,7 +276,10 @@ load = DictLoader(
             <div class="comment-meta">
                 <div class="comment-author">
                     <span>{{ cobject.created_by | e }}</span>
+                    {%- if cobject.created_by_contact | length -%}
+                    <span>,</span>
                     <span>{{ cobject.created_by_contact | e }}</span>
+                    {%- endif -%}
                 </div>
                 <div class="comment-date">
                     <span>{{ cobject.created_on_dt.date() }}</span>
@@ -345,7 +348,15 @@ def get_comments_for_slug(slug: str, path: list = []):
         else:
             app_log.warn(f"Skipping file {comment_file} (len {len(comment_file.stem)})")
             continue
-        c.created_by = comment_raw_list_cleaned_up[0]
+
+        author = comment_raw_list_cleaned_up[0].split(",")
+        if len(author) == 0:
+            c.created_by = comment_raw_list_cleaned_up[0]
+        elif len(author) == 1:
+            c.created_by = author[0]
+        elif len(author) == 2:
+            c.created_by = author[0]
+            c.created_by_contact = author[1]
         c.paragraphs = comment_raw_list_cleaned_up[1:]
 
         comments.append(c)
