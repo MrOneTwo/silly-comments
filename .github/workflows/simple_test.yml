@@ -15,7 +15,7 @@ jobs:
       run: |
         sudo apt install nodejs npm && npm i -g html-validate
         pip install -r requirements.txt
-    - name: Test the endpoints
+    - name: test the endpoints
       run: |
         ./cmd.sh run &
         sleep 2
@@ -38,6 +38,6 @@ jobs:
           -d "for=deeper&comment_author=bobek&comment_contact=noraczej@wp.pl&comment='nie nie nie'"
         cat comments/example/deeper/*
         echo "::endgroup::"
-    - name: Test the endpoints
+    - name: run pytest
       run: |
         ./cmd.sh run_tests
