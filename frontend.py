@@ -324,22 +324,10 @@ def get_comments_for_slug(slug: str, path: list = []):
         # Need to concat those lines but still keep the comment split into
         # paragraphs.
         comment_raw = comment_file.read_text()
-        # Empty lines will show up as zero len string elements.
-        comment_raw_list = comment_raw.split("\n")
-        comment_raw_list_cleaned_up = list()
 
-        chunk = ""
-        # Iterate until there is no next element.
-        for i, line in enumerate(comment_raw_list):
-            try:
-                if line == "":
-                    # This is a bit clumsy and because of it I need to strip the chunk.
-                    comment_raw_list_cleaned_up.append(chunk.strip())
-                    chunk = ""
-                    continue
-                chunk = chunk + " " + line
-            except IndexError:
-                break
+        comment_paragraphs = list()
+        for paragraph in [x.strip() for x in comment_raw.split("\n\n")]:
+            comment_paragraphs.append(paragraph.replace("\n", ""))
 
         c = Comment()
         # The ULID generates a 26 char long hashes.
@@ -350,15 +338,15 @@ def get_comments_for_slug(slug: str, path: list = []):
             app_log.warn(f"Skipping file {comment_file} (len {len(comment_file.stem)})")
             continue
 
-        author = comment_raw_list_cleaned_up[0].split(",")
+        author = comment_paragraphs[0].split(",")
         if len(author) == 0:
-            c.created_by = comment_raw_list_cleaned_up[0]
+            c.created_by = comment_paragraphs[0]
         elif len(author) == 1:
             c.created_by = author[0]
         elif len(author) == 2:
             c.created_by = author[0]
             c.created_by_contact = author[1]
-        c.paragraphs = comment_raw_list_cleaned_up[1:]
+        c.paragraphs = comment_paragraphs[1:]
 
         comments.append(c)
 
