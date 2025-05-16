@@ -333,7 +333,8 @@ def get_comments_for_slug(slug: str, path: list = []):
         for i, line in enumerate(comment_raw_list):
             try:
                 if line == "":
-                    comment_raw_list_cleaned_up.append(chunk)
+                    # This is a bit clumsy and because of it I need to strip the chunk.
+                    comment_raw_list_cleaned_up.append(chunk.strip())
                     chunk = ""
                     continue
                 chunk = chunk + " " + line
