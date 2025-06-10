@@ -53,6 +53,7 @@ def test_comment_api_into_file():
     comments = ft.get_comments_for_slug("example", [".",])
 
     assert len(comments[-1].paragraphs) == 1
+    assert comments[-1].created_by == "Elliot"
 
     result_path.unlink()
 
