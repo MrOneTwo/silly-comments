@@ -113,15 +113,15 @@ def create_app():
 
             if request.method == "POST":
                 form = request.form.to_dict()
-                app_log.info(f"Got form: {form}")
-                author = form.get("comment_author").strip()
-                author_contact = form.get("comment_contact").strip()
-
-                notifier.notify(f"{form}")
 
                 try:
-                    # split with value 1 will create two elements.
-                    comment = form.get("comment").strip()
+                    author = form.get("comment_author").strip()
+                    author_contact = form.get("comment_contact").strip()
+                    comment = form.get("comment").strip().replace("\r\n", "\n")
+
+                    app_log.info(f"Got form: {form}{comment}")
+                    notifier.notify(f"{form}")
+
                     comment_fname = str(ulid.new())
                     create_new_comment(
                         author, author_contact, comment, comment_fname, which_list
@@ -192,8 +192,8 @@ class Comment:
     def __init__(self):
         self.created_on_ts = 0
         self.created_on_dt = 0
-        self.created_by = ""
-        self.created_by_contact = ""
+        self.created_by = None
+        self.created_by_contact = None
         self.paragraphs = list()
 
     def __repr__(self):
@@ -231,6 +231,33 @@ class Comment:
 
         return c
 
+    def dump_into_file(self, fpath: list[str], fname: str) -> Optional[Path]: 
+        if self.created_by is None:
+            return None
+
+        app_log.info(f"Creating new comment:")
+        app_log.info(f"  {self.created_by}")
+        app_log.info(f"  {self.created_by_contact}")
+        app_log.info(f"  {fpath}/{fname}")
+
+        # Create the folder structure in the root of params.COMMENTS_DIR.
+        if not Path(params.COMMENTS_DIR, *fpath).exists():
+            Path(params.COMMENTS_DIR, *fpath).mkdir(parents=True)
+
+        p = Path(params.COMMENTS_DIR, *fpath, fname).with_suffix(".txt")
+
+        try:
+            with p.open(mode="x") as new_comment_file:
+                new_comment_file.write(f"{self.created_by},{self.created_by_contact}\n")
+                for par in self.paragraphs:
+                    new_comment_file.write("\n")
+                    new_comment_file.write(par)
+                    new_comment_file.write("\n")
+                app_log.info(f"Comment saved to {p}")
+        except FileExistsError:
+            app_log.error(f"File {p} already exists, skipping comment!")
+
+        return p
 
 
 # - HTML functions --------------------------------------------------------------------------------
