@@ -1,5 +1,6 @@
 import frontend as ft
 import ulid
+from pathlib import Path
 
 def test_load_comments():
     comments = ft.get_comments_for_slug("example", [".",])
@@ -18,3 +19,9 @@ def test_create_comment():
 
     # Cleanup after yourself!
     path.unlink()
+
+def test_comment_api_from_path():
+    p = Path("comments", "example", "deeper", "01H7A86Y8EM4DM3FM25EWPHB8W.txt")
+    c = ft.Comment.from_path(p)
+    print(c)
+

@@ -1,3 +1,6 @@
+# needs to be first; unnecessary after Python 3.14
+from __future__ import annotations
+
 from flask import Flask, flash, request, redirect, url_for, Response
 from werkzeug.utils import secure_filename
 from pathlib import Path
@@ -193,6 +196,42 @@ class Comment:
         self.created_by_contact = ""
         self.paragraphs = list()
 
+    def __repr__(self):
+        ret = f"{self.created_by},{self.created_by_contact},{self.paragraphs}"
+        return ret
+
+    def from_path(fpath: Path) -> list[Comment]:
+        # I assume that a comment paragraph can be split over multiple lines.
+        # Need to concat those lines but still keep the comment split into
+        # paragraphs.
+        comment_raw = fpath.read_text()
+
+        comment_paragraphs = list()
+        for paragraph in [x.strip() for x in comment_raw.split("\n\n")]:
+            comment_paragraphs.append(paragraph.replace("\n", ""))
+
+        c = Comment()
+        # The ULID generates a 26 char long hashes.
+        if len(fpath.stem) == 26:
+            c.created_on_ts = ulid.parse(fpath.stem).timestamp().int
+            c.created_on_dt = datetime.fromtimestamp(c.created_on_ts / 1000)
+        else:
+            app_log.warn(f"Skipping file {fpath} (len {len(fpath.stem)})")
+            return None
+
+        author = comment_paragraphs[0].split(",")
+        if len(author) == 0:
+            c.created_by = comment_paragraphs[0]
+        elif len(author) == 1:
+            c.created_by = author[0]
+        elif len(author) == 2:
+            c.created_by = author[0]
+            c.created_by_contact = author[1]
+        c.paragraphs = comment_paragraphs[1:]
+
+        return c
+
+
 
 # - HTML functions --------------------------------------------------------------------------------
 
@@ -320,34 +359,7 @@ def get_comments_for_slug(slug: str, path: list = []):
     app_log.info(f"{paths}")
 
     for comment_file in paths:
-        # I assume that a comment paragraph can be split over multiple lines.
-        # Need to concat those lines but still keep the comment split into
-        # paragraphs.
-        comment_raw = comment_file.read_text()
-
-        comment_paragraphs = list()
-        for paragraph in [x.strip() for x in comment_raw.split("\n\n")]:
-            comment_paragraphs.append(paragraph.replace("\n", ""))
-
-        c = Comment()
-        # The ULID generates a 26 char long hashes.
-        if len(comment_file.stem) == 26:
-            c.created_on_ts = ulid.parse(comment_file.stem).timestamp().int
-            c.created_on_dt = datetime.fromtimestamp(c.created_on_ts / 1000)
-        else:
-            app_log.warn(f"Skipping file {comment_file} (len {len(comment_file.stem)})")
-            continue
-
-        author = comment_paragraphs[0].split(",")
-        if len(author) == 0:
-            c.created_by = comment_paragraphs[0]
-        elif len(author) == 1:
-            c.created_by = author[0]
-        elif len(author) == 2:
-            c.created_by = author[0]
-            c.created_by_contact = author[1]
-        c.paragraphs = comment_paragraphs[1:]
-
+        c = Comment.from_path(comment_file)
         comments.append(c)
 
     # TODO(michalc): might be better to move this to when we create a new comment.
@@ -362,7 +374,7 @@ def create_new_comment(
     comment: str,
     comment_fname: str,
     path_list: list,
-):
+) -> Path:
     app_log.info(f"Creating new comment:")
     app_log.info(f"  {author_name}")
     app_log.info(f"  {author_contact}")
