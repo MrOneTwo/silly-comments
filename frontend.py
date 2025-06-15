@@ -115,17 +115,16 @@ def create_app():
                 form = request.form.to_dict()
 
                 try:
-                    author = form.get("comment_author").strip()
-                    author_contact = form.get("comment_contact").strip()
-                    comment = form.get("comment").strip().replace("\r\n", "\n")
+                    comment = Comment()
+                    comment.created_by = form.get("comment_author").strip()
+                    comment.created_by_contact = form.get("comment_contact").strip()
+                    comment.paragraphs = form.get("comment").strip().replace("\r\n", "\n").split("\n\n")
+                    comment_fname = str(ulid.new())
 
                     app_log.info(f"Got form: {form}{comment}")
                     notifier.notify(f"{form}")
 
-                    comment_fname = str(ulid.new())
-                    create_new_comment(
-                        author, author_contact, comment, comment_fname, which_list
-                    )
+                    comment.dump_into_file(which_list, comment_fname)
                 except ValueError:
                     app_log.error(
                         f"Failed to extract the author's name and email from {form}"
@@ -200,7 +199,10 @@ class Comment:
         ret = f"{self.created_by},{self.created_by_contact},{self.paragraphs}"
         return ret
 
-    def from_path(fpath: Path) -> list[Comment]:
+    def from_path(fpath: Path) -> Optional[Comment]:
+        if not fpath.exists():
+            return None
+
         # I assume that a comment paragraph can be split over multiple lines.
         # Need to concat those lines but still keep the comment split into
         # paragraphs.
@@ -238,7 +240,7 @@ class Comment:
         app_log.info(f"Creating new comment:")
         app_log.info(f"  {self.created_by}")
         app_log.info(f"  {self.created_by_contact}")
-        app_log.info(f"  {fpath}/{fname}")
+        app_log.info(f"  {Path(*fpath, fname)}")
 
         # Create the folder structure in the root of params.COMMENTS_DIR.
         if not Path(params.COMMENTS_DIR, *fpath).exists():
@@ -387,40 +389,11 @@ def get_comments_for_slug(slug: str, path: list = []):
 
     for comment_file in paths:
         c = Comment.from_path(comment_file)
-        comments.append(c)
+        if c:
+            comments.append(c)
 
     # TODO(michalc): might be better to move this to when we create a new comment.
     comments = sorted(comments, key=lambda c: c.created_on_ts)
 
     return comments
 
-
-def create_new_comment(
-    author_name: str,
-    author_contact: str,
-    comment: str,
-    comment_fname: str,
-    path_list: list,
-) -> Path:
-    app_log.info(f"Creating new comment:")
-    app_log.info(f"  {author_name}")
-    app_log.info(f"  {author_contact}")
-    app_log.info(f"  {path_list}")
-    app_log.info(f"  {comment_fname}")
-
-    if not Path(params.COMMENTS_DIR, *path_list).exists():
-        Path(params.COMMENTS_DIR, *path_list).mkdir(parents=True)
-
-    p = Path(params.COMMENTS_DIR, *path_list, comment_fname).with_suffix(".txt")
-
-    try:
-        with p.open(mode="x") as new_comment_file:
-            new_comment_file.write(f"{author_name},{author_contact}\n")
-            new_comment_file.write("\n")
-            new_comment_file.write(comment)
-            new_comment_file.write("\n")
-            app_log.info(f"Comment saved to {p}")
-    except FileExistsError:
-        app_log.error(f"File {p} already exists, skipping comment!")
-
-    return p
