@@ -28,7 +28,12 @@ def test_create_comment(file_cleanup):
     comments = ft.get_comments_for_slug("example", [".",])
 
     comment_fname = str(ulid.new())
-    path = ft.create_new_comment("Leon", "leon@gmail.com", "Do you dream, Elliot?", comment_fname, ["example",])
+    c = ft.Comment()
+    c.created_by = "Leon"
+    c.created_by_contact = "leon@gmail.com"
+    c.paragraphs = "Do you dream, Elliot?"
+
+    path = c.dump_into_file(["example",], comment_fname)
     file_cleanup.append(path)
 
     comments = ft.get_comments_for_slug("example", [".",])

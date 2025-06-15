@@ -1,4 +1,7 @@
-michal, michal@gmail.com
+from:michal
+from_contact:michal@gmail.com
+
+---
 
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec tincidunt magna vel faucibus mattis.
 Fusce elit dui, malesuada in orci quis, venenatis fermentum arcu. Aliquam vel augue ut justo cursus

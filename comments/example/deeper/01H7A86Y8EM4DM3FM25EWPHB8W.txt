@@ -1,3 +1,6 @@
-niemichal, niemichal@gmail.com
+from:niemichal
+from_contact:niemichal@gmail.com
+
+---
 
 This comment is nested bit deeper to test deeper filesystem comments.

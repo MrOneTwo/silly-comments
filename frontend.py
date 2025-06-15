@@ -26,6 +26,10 @@ import notifier
 # That's what URL_PREFIX is for.
 URL_PREFIX = "/comments"
 
+HDR_FROM = "from"
+HDR_FROM_CONTACT = "from_contact"
+HDR_CONTENT_SPLITTER = "---"
+
 
 def reload_params():
     global params
@@ -208,8 +212,10 @@ class Comment:
         # paragraphs.
         comment_raw = fpath.read_text()
 
+        comment_meta, comment_content = comment_raw.split(HDR_CONTENT_SPLITTER, maxsplit=1)
+
         comment_paragraphs = list()
-        for paragraph in [x.strip() for x in comment_raw.split("\n\n")]:
+        for paragraph in [x.strip() for x in comment_content.split("\n\n")]:
             comment_paragraphs.append(paragraph.replace("\n", ""))
 
         c = Comment()
@@ -221,14 +227,12 @@ class Comment:
             app_log.warn(f"Skipping file {fpath} (len {len(fpath.stem)})")
             return None
 
-        author = comment_paragraphs[0].split(",")
-        if len(author) == 0:
-            c.created_by = comment_paragraphs[0]
-        elif len(author) == 1:
-            c.created_by = author[0]
-        elif len(author) == 2:
-            c.created_by = author[0]
-            c.created_by_contact = author[1]
+        for line in comment_meta.split("\n"):
+            if (HDR_FROM + ":") in line:
+                c.created_by = line.split(":", maxsplit=1)[1]
+            elif (HDR_FROM_CONTACT + ":") in line:
+                c.created_by_contact = line.split(":", maxsplit=1)[1]
+
         c.paragraphs = comment_paragraphs[1:]
 
         return c
@@ -250,7 +254,9 @@ class Comment:
 
         try:
             with p.open(mode="x") as new_comment_file:
-                new_comment_file.write(f"{self.created_by},{self.created_by_contact}\n")
+                new_comment_file.write(f"{HDR_FROM}:{self.created_by}\n")
+                new_comment_file.write(f"{HDR_FROM_CONTACT}:{self.created_by_contact}\n")
+                new_comment_file.write(f"\n{HDR_CONTENT_SPLITTER}\n")
                 for par in self.paragraphs:
                     new_comment_file.write("\n")
                     new_comment_file.write(par)
