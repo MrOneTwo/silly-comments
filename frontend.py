@@ -203,7 +203,11 @@ class Comment:
         ret = f"{self.created_by},{self.created_by_contact},{self.paragraphs}"
         return ret
 
-    def from_path(fpath: Path) -> Optional[Comment]:
+    @classmethod
+    def from_path(cls, fpath: Path) -> Optional[Comment]:
+        """
+        Constructor for Comment, from a comment file.
+        """
         if not fpath.exists():
             return None
 
