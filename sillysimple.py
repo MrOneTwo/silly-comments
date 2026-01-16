@@ -352,7 +352,7 @@ html_comments = """\
             <input type="text" id="comment_author" name="comment_author" placeholder="Name" required><br>
             <div>
             <input type="text" id="comment_contact" name="comment_contact" placeholder="e-mail or other contact info">
-            <input type="checkbox" id="comment_contact_hide" name="hide" checked />
+            <input type="checkbox" id="comment_contact_hide" name="hide" checked>
             <label for="comment_contact_hide">Hide contact info</label>
             </div>
             <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
