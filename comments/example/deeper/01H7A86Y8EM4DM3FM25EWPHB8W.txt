@@ -1,4 +1,4 @@
-from:niemichal
+from_name:niemichal
 from_contact:niemichal@gmail.com
 
 ---

@@ -26,8 +26,9 @@ import notifier
 # That's what URL_PREFIX is for.
 URL_PREFIX = "/comments"
 
-HDR_FROM = "from"
+HDR_FROM = "from_name"
 HDR_FROM_CONTACT = "from_contact"
+HDR_FROM_CONTACT_HIDE = "from_hide_contact"
 HDR_CONTENT_SPLITTER = "---"
 
 
@@ -122,6 +123,12 @@ def create_app():
                     comment = Comment()
                     comment.created_by = form.get("comment_author").strip()
                     comment.created_by_contact = form.get("comment_contact").strip()
+                    # Existence of 'hide' key implies that it's checked. Otherwise the form doesn't
+                    # even send it.
+                    if form.get("hide"):
+                        pass
+                    else:
+                        comment.contact_hide = False
                     comment.paragraphs = form.get("comment").strip().replace("\r\n", "\n").split("\n\n")
                     comment_fname = str(ulid.new())
 
@@ -197,10 +204,11 @@ class Comment:
         self.created_on_dt = 0
         self.created_by = None
         self.created_by_contact = None
+        self.contact_hide = True
         self.paragraphs = list()
 
     def __repr__(self):
-        ret = f"{self.created_by},{self.created_by_contact},{self.paragraphs}"
+        ret = f"{self.created_by},{self.created_by_contact},{self.contact_hide},{self.paragraphs}"
         return ret
 
     @classmethod
@@ -231,17 +239,22 @@ class Comment:
             app_log.warn(f"Skipping file {fpath} (len {len(fpath.stem)})")
             return None
 
-        for line in comment_meta.split("\n"):
-            if (HDR_FROM + ":") in line:
-                c.created_by = line.split(":", maxsplit=1)[1]
-            elif (HDR_FROM_CONTACT + ":") in line:
-                c.created_by_contact = line.split(":", maxsplit=1)[1]
+        meta_lines = [l.strip() for l in comment_meta.split("\n") if len(l) > 0]
+
+        for line in meta_lines:
+            key, val = line.split(":", 1)
+            if HDR_FROM in key:
+                c.created_by = val
+            elif HDR_FROM_CONTACT in key:
+                c.created_by_contact = val
+            elif HDR_FROM_CONTACT_HIDE in key:
+                c.contact_hide = True if val == "True" else False
 
         c.paragraphs = comment_paragraphs[1:]
 
         return c
 
-    def dump_into_file(self, fpath: list[str], fname: str) -> Optional[Path]: 
+    def dump_into_file(self, fpath: list[str], fname: str) -> Optional[Path]:
         if self.created_by is None:
             return None
 
@@ -260,6 +273,7 @@ class Comment:
             with p.open(mode="x") as new_comment_file:
                 new_comment_file.write(f"{HDR_FROM}:{self.created_by}\n")
                 new_comment_file.write(f"{HDR_FROM_CONTACT}:{self.created_by_contact}\n")
+                new_comment_file.write(f"{HDR_FROM_CONTACT_HIDE}:{self.contact_hide}\n")
                 new_comment_file.write(f"\n{HDR_CONTENT_SPLITTER}\n")
                 for par in self.paragraphs:
                     new_comment_file.write("\n")
@@ -336,7 +350,11 @@ html_comments = """\
     <div class="comment-submit">
         <form hx-post="{{ remote }}/{{ endpoint }}" hx-vals='{"for": "{{ which }}" }' hx-target="#comments" hx-swap="outerHTML" enctype="multipart/form-data">
             <input type="text" id="comment_author" name="comment_author" placeholder="Name" required><br>
-            <input type="text" id="comment_contact" name="comment_contact" placeholder="e-mail or other contact info"><br>
+            <div>
+            <input type="text" id="comment_contact" name="comment_contact" placeholder="e-mail or other contact info">
+            <input type="checkbox" id="comment_contact_hide" name="hide" checked />
+            <label for="comment_contact_hide">Hide contact info</label>
+            </div>
             <textarea id="comment" name="comment" placeholder="Comment..." required></textarea><br>
             <button id="submit" class="custom-file-upload" type="submit">Submit</button>
         </form>
@@ -354,9 +372,12 @@ load = DictLoader(
             <div class="comment-meta">
                 <div class="comment-author">
                     <span>{{ cobject.created_by | e }}</span>
+                    {%- if cobject.contact_hide -%}
+                    {%- else -%}
                     {%- if cobject.created_by_contact | length -%}
                     <span>,</span>
                     <span>{{ cobject.created_by_contact | e }}</span>
+                    {%- endif -%}
                     {%- endif -%}
                 </div>
                 <div class="comment-date">

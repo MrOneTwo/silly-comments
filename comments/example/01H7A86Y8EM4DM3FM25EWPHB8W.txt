@@ -1,5 +1,6 @@
-from:michal
+from_name:michal
 from_contact:michal@gmail.com
+from_hide_contact:False
 
 ---
 
