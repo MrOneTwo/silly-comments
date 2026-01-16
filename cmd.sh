@@ -12,7 +12,7 @@ BOLD=`tput bold`
 RESET=`tput sgr0`
 
 run() {
-  flask --app frontend.py run -p 32168
+  flask --app sillysimple.py run -p 32168
 }
 
 deploy() {
@@ -38,10 +38,10 @@ kill() {
   local REMOTE_SERVER=$(sed -n 2p $HOST_INFO_FILE)
   local REMOTE_USER=$(sed -n 3p $HOST_INFO_FILE)
 
-  printf "Killing frontend.py...\n"
+  printf "Killing sillysimple.py...\n"
 
-  pid=$(ssh "$REMOTE_USER"@"$REMOTE_SERVER" ps ax | grep frontend.py | awk '{print $1}')
-  printf "frontend.py PID: %d\n" "$pid"
+  pid=$(ssh "$REMOTE_USER"@"$REMOTE_SERVER" ps ax | grep sillysimple.py | awk '{print $1}')
+  printf "sillysimple.py PID: %d\n" "$pid"
 }
 
 run_tests() {

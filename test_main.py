@@ -1,4 +1,4 @@
-import frontend as ft
+import sillysimple as ss
 import ulid
 from pathlib import Path
 import pytest
@@ -21,14 +21,14 @@ def file_cleanup(request):
 
 
 def test_load_comments():
-    comments = ft.get_comments_for_slug("example", [".",])
+    comments = ss.get_comments_for_slug("example", [".",])
     assert len(comments) == 1
 
 def test_create_comment(file_cleanup):
-    comments = ft.get_comments_for_slug("example", [".",])
+    comments = ss.get_comments_for_slug("example", [".",])
 
     comment_fname = str(ulid.new())
-    c = ft.Comment()
+    c = ss.Comment()
     c.created_by = "Leon"
     c.created_by_contact = "leon@gmail.com"
     c.paragraphs = "Do you dream, Elliot?"
@@ -36,14 +36,14 @@ def test_create_comment(file_cleanup):
     path = c.dump_into_file(["example",], comment_fname)
     file_cleanup.append(path)
 
-    comments = ft.get_comments_for_slug("example", [".",])
+    comments = ss.get_comments_for_slug("example", [".",])
 
     assert comments[1].created_by == "Leon"
     assert len(comments) == 2
 
 def test_comment_api_from_path():
     p = Path("comments", "example", "01H7A86Y8EM4DM3FM25EWPHB8W.txt")
-    c = ft.Comment.from_path(p)
+    c = ss.Comment.from_path(p)
     #print(c)
 
     assert len(c.paragraphs) == 3
@@ -51,20 +51,20 @@ def test_comment_api_from_path():
 def test_comment_api_into_file_author_fail():
     comment_fname = str(ulid.new())
 
-    comment = ft.Comment()
+    comment = ss.Comment()
     comment.created_by_contact = "leon@gmail.com"
     comment.paragraphs = ["Do you dream, Elliot?", "You scraping so hard..."]
 
     assert comment.dump_into_file(["example",], comment_fname) is None
 
-    comments = ft.get_comments_for_slug("example", [".",])
+    comments = ss.get_comments_for_slug("example", [".",])
 
 def test_comment_api_into_file(file_cleanup):
-    comments = ft.get_comments_for_slug("example", [".",])
+    comments = ss.get_comments_for_slug("example", [".",])
 
     comment_fname = str(ulid.new())
 
-    comment = ft.Comment()
+    comment = ss.Comment()
     comment.created_by = "Elliot"
     comment.created_by_contact = "elliot@protonmail.com"
     comment.paragraphs = ["How do I know which one's for me?",]
@@ -72,7 +72,7 @@ def test_comment_api_into_file(file_cleanup):
     result_path = comment.dump_into_file(["example",], comment_fname)
     file_cleanup.append(result_path)
 
-    comments = ft.get_comments_for_slug("example", [".",])
+    comments = ss.get_comments_for_slug("example", [".",])
 
     assert len(comments[-1].paragraphs) == 1
     assert comments[-1].created_by == "Elliot"

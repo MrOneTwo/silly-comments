@@ -169,7 +169,7 @@ logging.config.dictConfig(
             },
             "log_file": {
                 "class": "logging.handlers.RotatingFileHandler",
-                "filename": "frontend.log",
+                "filename": "sillysimple.log",
                 "formatter": "default",
                 "mode": "a",
                 "maxBytes": 10 * 1024,
