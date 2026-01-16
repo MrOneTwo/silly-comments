@@ -1,0 +1,13 @@
+[project]
+name = "silly-comments"
+version = "0.1.0"
+description = "Silly simple website comment system using HTMX"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "jinja2",
+    "flask",
+    "ulid-py",
+    "pytest",
+    "requests>=2.32.5",
+]
