@@ -1,0 +1,17 @@
+[Unit]
+Description=Silly simple website comments system
+Wants=network.target
+
+[Service]
+Type=simple
+
+ExecStart=/root/.local/bin/uv run flask --app sillysimple.py run -p 32168
+WorkingDirectory=/root/silly-comments
+
+Restart=on-failure
+RestartSec=5s
+RestartSteps=5
+RestartMaxDelaySec=30s
+
+[Install]
+WantedBy=multi-user.target

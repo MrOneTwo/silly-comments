@@ -27,5 +27,5 @@ Or go with the [uv](https://docs.astral.sh/uv/):
 
 ```sh
 uv sync
-uv run flask --app sillysimple.py -p 32168
+uv run flask --app sillysimple.py run -p 32168
 ```
